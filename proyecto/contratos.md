@@ -7,7 +7,7 @@ Cambiar algo de acá requiere avisar a los dos.
 ```json
 {
   "zone": "pergamino",
-  "crop": "trigo",
+  "crop": "wheat",
   "wallet": "<pubkey base58>",
   "signal": "below",
   "predicted_pct": 60,
@@ -27,6 +27,15 @@ Cambiar algo de acá requiere avisar a los dos.
 
 `POST /api/round/close` — body: `{ "zone": "pergamino", "reports": Report[] }`
 
+El servidor revisa la ronda antes de cerrarla ([lib/validation.ts](../lib/validation.ts)) y no modifica los datos (el hash firmado onchain sigue valiendo):
+
+- `wallet` tiene que ser una dirección de Solana válida, y **una sola por ronda** (OD-23).
+- `note` y `crop` no pueden estar vacíos; `note` hasta 500 caracteres.
+- `predicted_pct` es un entero de 0 a 100; `signal` es `"below"` o `"normal"`; `ts` es fecha ISO en UTC.
+- Todos los reportes son de la `zone` del body, que tiene que existir.
+
+Errores: `400 { "error": "Invalid round: reports.1.note: note is empty" }` si algo de lo anterior falla o el JSON está roto; `503` si Open-Meteo no responde (OD-25) o si la revisión de Claude no está disponible (OD-26). Con `503` la ronda se suspende: no se marca ni se paga a nadie.
+
 Respuesta (`RoundResult`):
 
 ```json
@@ -36,14 +45,16 @@ Respuesta (`RoundResult`):
   "satellite_status": "normal",
   "panel_status": "below",
   "divergence": true,
-  "weather": { "source": "open-meteo", "soil_moisture": 0.21, "baseline": 0.24, "precip_30d_mm": 18 },
-  "flags": [{ "wallet": "<pubkey>", "reason": "Reporta normal con 30 días sin lluvia y 4 de 5 vecinos en sequía" }],
-  "scores": [{ "wallet": "<pubkey>", "score": 1.4, "reward": 14 }],
+  "weather": { "source": "open-meteo", "soil_moisture": 0.21, "precip_30d_mm": 18, "baseline_30d_mm": 61 },
+  "flags": [{ "wallet": "<pubkey>", "reason": "Copies word for word the note of informant 3ck3…UNTD." }],
+  "scores": [{ "wallet": "<pubkey>", "score": 1.4, "reward": 0.0049 }],
   "explanation": "Dos frases para mostrar en pantalla.",
-  "model": "claude-sonnet-5-5 | rule-based"
+  "model": "claude-haiku-4-5-20251001"
 }
 ```
 
-- `index`: 0 (sin estrés) a 1 (estrés severo). Fórmula fija: `0.5 * clima + 0.5 * consenso del panel ponderado por puntaje`. La IA no define el número: solo baja el peso de los reportes marcados y escribe `explanation`.
-- `reward`: unidades del token de prueba a transferir a cada wallet (las transfiere Dev A).
+- `model`: el modelo de Claude que hizo la revisión, tal como lo informa la API (hoy `claude-haiku-4-5-20251001`, OD-06).
+- `weather`: `source` es `"open-meteo"` o `"fixed"`; `soil_moisture` (m³/m³, puede ser `null`); `precip_30d_mm` es la lluvia de los últimos 30 días y `baseline_30d_mm` el promedio de esa ventana en los 5 años anteriores. Es la forma de `lib/types.ts`, que ya usa la pantalla de Dev A.
+- `index`: 0 (sin estrés) a 1 (estrés severo). Fórmula fija (OD-03): `0.5 * estrés climático + 0.5 * proporción del panel que dice "below"`, sin contar los reportes marcados. La IA no define el número: solo marca reportes y escribe `explanation`.
+- `reward`: SOL de devnet a transferir a cada wallet, redondeado hacia abajo a 0,0001 SOL; el total no pasa del fondo de la ronda, `ROUND_POOL_SOL` (0,02 por defecto). Dev A no envía montos menores a 0,001 SOL, el mínimo para que exista una cuenta nueva (OD-21).
 - `satellite_status`: en el MVP sale de clima (Open-Meteo); NDVI queda para "Después".
