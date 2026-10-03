@@ -22,6 +22,40 @@ Reglas de seguridad:
 - **Dev B** (senior, ventas): API de cierre (clima, puntaje, IA) + validación con usuarios + contenido del pitch.
 - **AV** (audiovisual): storyboard, deck en inglés, videos, capturas, logo.
 
+## Cómo arrancar
+
+Repo: `git@github.com:jmarine-sys/groundtruth-ag.git`. Cada dev trabaja en su rama y se integra en `main` en los puntos de control.
+
+```bash
+git clone git@github.com:jmarine-sys/groundtruth-ag.git
+cd groundtruth-ag && npm install
+git checkout dev-a          # Dev A · dev-b para Dev B
+cp .env.example .env.local  # completar; nunca commitear
+npm run dev                 # http://localhost:3000
+npm test
+```
+
+| Persona | Rama | Arranca por | Ya hecho (revisar, no reescribir) |
+|---|---|---|---|
+| Dev A | `dev-a` | T0.1 deploy en Vercel → T1.1 Phantom → T1.2 Memo | Esqueleto Next.js, tipos en `lib/types.ts` |
+| Dev B | `dev-b` | Clave de Claude en `.env.local` → probar `POST /api/round/close` → T2.4 llamadas | T1.3 `lib/weather.ts`, T1.4 `lib/scoring.ts`, T2.1 `lib/ai.ts`, ruta `app/api/round/close/route.ts`, `lib/fixtures.ts` |
+| AV | — | T0.3 storyboard → T1.5 deck | — |
+
+Integración: a la 1:30 y a las 2:30, merge de `dev-a` y `dev-b` en `main` y prueba del recorrido completo en la URL pública.
+
+Probar la API de cierre (sin wallets reales):
+
+```bash
+curl -s -X POST localhost:3000/api/round/close -H 'content-type: application/json' \
+  -d '{"zone":"pergamino","reports":[
+  {"zone":"pergamino","crop":"trigo","wallet":"A1","signal":"below","predicted_pct":70,"note":"Lotes de loma secos","ts":"2026-10-03T15:00:00Z"},
+  {"zone":"pergamino","crop":"trigo","wallet":"B2","signal":"below","predicted_pct":65,"note":"Macollaje pobre","ts":"2026-10-03T15:01:00Z"},
+  {"zone":"pergamino","crop":"trigo","wallet":"C3","signal":"below","predicted_pct":80,"note":"Amarillamiento","ts":"2026-10-03T15:02:00Z"},
+  {"zone":"pergamino","crop":"trigo","wallet":"D4","signal":"below","predicted_pct":90,"note":"Lotes de loma secos","ts":"2026-10-03T15:03:00Z"}]}'
+```
+
+Esperado: `divergence: true` si el clima del día es normal, y `D4` en `flags` por copiar la nota de `A1`.
+
 ## Bloques de trabajo
 
 ### Bloque 0 · Arranque (0:00–0:20)
