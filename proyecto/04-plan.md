@@ -81,7 +81,7 @@ Reglas de seguridad:
 
 ## Estado
 
-- [ ] T0.1 · [ ] T0.2 · [ ] T0.3 · [ ] T0.4
-- [ ] T1.1 · [ ] T1.2 · [ ] T1.3 · [ ] T1.4 · [ ] T1.5
-- [ ] T2.1 · [ ] T2.2 · [ ] T2.3 · [ ] T2.4 · [ ] T2.5
+- [ ] T0.1 (falta el deploy en Vercel; repo local listo) · [ ] T0.2 · [ ] T0.3 · [ ] T0.4
+- [ ] T1.1 · [ ] T1.2 · [x] T1.3 (falta revisión de Dev B) · [x] T1.4 (falta revisión de Dev B) · [ ] T1.5
+- [x] T2.1 (falta probarlo con la clave de Claude) · [ ] T2.2 · [ ] T2.3 · [ ] T2.4 · [ ] T2.5
 - [ ] T3.1 · [ ] T3.2 · [ ] T3.3 · [ ] T3.4 · [ ] T3.5
