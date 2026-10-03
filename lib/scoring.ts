@@ -40,7 +40,7 @@ export function rbtsScores(reports: Report[]): Map<string, number> {
 
 /**
  * Reparte el fondo de la ronda en proporción al puntaje. Los reportes marcados
- * como sospechosos no cobran. Las recompensas son unidades enteras del token de prueba.
+ * como sospechosos no cobran. Las recompensas se redondean hacia abajo al centavo de USDC.
  */
 export function rewards(
   reports: Report[],
@@ -57,7 +57,7 @@ export function rewards(
     const reward =
       flagged.has(r.wallet) || total === 0
         ? 0
-        : Math.floor((pool * (raw.get(r.wallet) ?? 0)) / total);
+        : Math.floor((100 * pool * (raw.get(r.wallet) ?? 0)) / total) / 100;
     return { wallet: r.wallet, score, reward };
   });
 }
@@ -65,7 +65,7 @@ export function rewards(
 /**
  * Colusión: una nota idéntica a la de otro informante anterior (sin importar mayúsculas
  * ni espacios). Una nota vacía no es copia de nadie. Se suma a la revisión de la IA;
- * sin IA la ronda no se cierra (OD-23).
+ * sin IA la ronda no se cierra (OD-26).
  */
 export function copiedNoteFlags(reports: Report[]): Flag[] {
   const seen = new Map<string, string>();

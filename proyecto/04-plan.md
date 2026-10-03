@@ -8,7 +8,7 @@
 - **Solana devnet**, RPC público. Para el código Solana, usar la skill `solana-dev` (librerías actuales, no tutoriales viejos).
 - **Hoy sin programa propio:** registro con el **programa Memo** y pagos con **transferencias de un token de prueba** en devnet. El programa Anchor queda para "Después".
 - **Phantom en modo Devnet** para firmar (todos ya lo tienen por el setup de la sede).
-- **Open-Meteo** para clima (sin clave). **Claude API** para la detección del reporte falso (sin plan B: si no responde, la ronda se suspende, OD-23).
+- **Open-Meteo** para clima (sin clave). **Claude API** para la detección del reporte falso (sin plan B: si no responde, la ronda se suspende, OD-26).
 
 Reglas de seguridad:
 - Solo devnet. Mainnet ni se toca.
@@ -55,7 +55,7 @@ curl -s -X POST localhost:3000/api/round/close -H 'content-type: application/jso
   {"zone":"pergamino","crop":"wheat","wallet":"36jCyD6dia9NmKaieuz7UxLuy7V4Gg6ftMpbU92pewYG","signal":"below","predicted_pct":90,"note":"Upland lots dry","ts":"2026-10-03T15:03:00Z"}]}'
 ```
 
-Esperado: `divergence: true` si el clima del día es normal, y la cuarta wallet (`36jC…ewYG`) en `flags` por copiar la nota de la primera. Las wallets tienen que ser direcciones de Solana válidas (OD-20); estas son de ejemplo, generadas al azar.
+Esperado: `divergence: true` si el clima del día es normal, y la cuarta wallet (`36jC…ewYG`) en `flags` por copiar la nota de la primera. Las wallets tienen que ser direcciones de Solana válidas (OD-23); estas son de ejemplo, generadas al azar.
 
 ## Bloques de trabajo
 
@@ -84,7 +84,7 @@ Esperado: `divergence: true` si el clima del día es normal, y la cuarta wallet 
 
 | ID | Quién | Tarea | Listo cuando | Prompt para Devin |
 |---|---|---|---|---|
-| T2.1 | B | Claude marca el reporte inconsistente y explica en 2 frases | El falso aparece en `flags` | "Completá @lib/ai.ts: llamá a Claude con reportes + clima, pedí salida JSON con flags y explanation; si falla, la ronda se suspende (OD-23)." |
+| T2.1 | B | Claude marca el reporte inconsistente y explica en 2 frases | El falso aparece en `flags` | "Completá @lib/ai.ts: llamá a Claude con reportes + clima, pedí salida JSON con flags y explanation; si falla, la ronda se suspende (OD-26)." |
 | T2.2 | A | "Cerrar ronda": transferir `reward` a cada wallet + Memo con el índice | 5 tx en Explorer | "En @app/api/payout/route.ts transferí el token de prueba a cada wallet según scores[].reward y registrá un Memo con el hash del RoundResult." |
 | T2.3 | A | Panel: satélite vs. panel, divergencia, botón "Pagar póliza" | Momento wow de punta a punta | "En @app/page.tsx mostrá el RoundResult, la alerta de divergencia y un botón que paga la póliza de demo." |
 | T2.4 | B | 2 llamadas de 10 min (agrónomo + aseguradora/cooperativa) | 2 citas con permiso | — |
@@ -111,8 +111,8 @@ Esperado: `divergence: true` si el clima del día es normal, y la cuarta wallet 
 | Riesgo | Plan B |
 |---|---|
 | Phantom no firma Memo en devnet | Firma el servidor con una wallet de demo y se declara |
-| No hay clave de Claude o falla | Se suspende la ronda (503) hasta que vuelva; sin veredicto de reemplazo (OD-23). Conseguir la clave es bloqueante |
-| Open-Meteo no responde | Se suspende la ronda (503) hasta que vuelva; sin datos de reemplazo (OD-22) |
+| No hay clave de Claude o falla | Se suspende la ronda (503) hasta que vuelva; sin veredicto de reemplazo (OD-26). Conseguir la clave es bloqueante |
+| Open-Meteo no responde | Se suspende la ronda (503) hasta que vuelva; sin datos de reemplazo (OD-25) |
 
 ## Estado
 

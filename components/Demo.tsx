@@ -32,8 +32,9 @@ interface Payout {
   payments: { wallet: string; reward: number; signature: string }[];
 }
 
-interface Policy {
-  triggered: boolean;
+interface BasisCover {
+  paid: boolean;
+  valid: number;
   reason?: string;
   payout?: number;
   signature?: string;
@@ -78,7 +79,7 @@ function Flow({ client }: { client: AppClient }) {
   const [mine, setMine] = useState<Report | null>(null);
   const [result, setResult] = useState<RoundResult | null>(null);
   const [payout, setPayout] = useState<Payout | null>(null);
-  const [policy, setPolicy] = useState<Policy | null>(null);
+  const [review, setReview] = useState<BasisCover | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [tab, setTab] = useState<"informant" | "operator">("informant");
   const [error, setError] = useState<string | null>(null);
@@ -298,7 +299,7 @@ function Flow({ client }: { client: AppClient }) {
               disabled={!!busy || reports.length < 3}
               onClick={async () => {
                 setPayout(null);
-                setPolicy(null);
+                setReview(null);
                 const r = await post<RoundResult>(
                   "/api/round/close",
                   { zone: ZONE, reports },
@@ -363,7 +364,7 @@ function Flow({ client }: { client: AppClient }) {
                   <tr className="text-left">
                     <th>Informant</th>
                     <th>Score</th>
-                    <th>Reward (GTT)</th>
+                    <th>Reward (USDC)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -398,19 +399,19 @@ function Flow({ client }: { client: AppClient }) {
                 </button>
                 <button
                   className="btn"
-                  disabled={!!busy || !payout || !!policy}
+                  disabled={!!busy || !payout || !!review}
                   onClick={async () => {
-                    const p = await post<Policy>(
-                      "/api/policy",
+                    const p = await post<BasisCover>(
+                      "/api/basis-cover",
                       { result },
-                      "policy",
+                      "review",
                     );
-                    if (p) setPolicy(p);
+                    if (p) setReview(p);
                   }}
                 >
-                  {busy === "policy"
-                    ? "Checking policy…"
-                    : "Settle demo policy"}
+                  {busy === "review"
+                    ? "Checking cover…"
+                    : "Settle basis-risk cover"}
                 </button>
               </div>
 
@@ -429,7 +430,7 @@ function Flow({ client }: { client: AppClient }) {
                   </li>
                   {payout.payments.map((p) => (
                     <li key={p.signature}>
-                      {p.reward} GTT → <code>{short(p.wallet)}</code> ·{" "}
+                      {p.reward} USDC → <code>{short(p.wallet)}</code> ·{" "}
                       <a
                         className="link"
                         href={explorer(p.signature)}
@@ -442,25 +443,38 @@ function Flow({ client }: { client: AppClient }) {
                   ))}
                 </ul>
               ) : null}
-              {policy ? (
-                <p className="mt-3 rounded bg-green-100 p-3 text-green-900">
-                  {policy.triggered ? (
+              {review ? (
+                <div
+                  className={`mt-3 rounded p-3 ${
+                    review.paid
+                      ? "bg-green-100 text-green-900"
+                      : "bg-neutral-100 text-neutral-800 dark:bg-neutral-900 dark:text-neutral-200"
+                  }`}
+                >
+                  {review.paid ? (
                     <>
-                      Demo policy paid {policy.payout} GTT to the insured farmer
-                      ·{" "}
-                      <a
-                        className="link"
-                        href={explorer(policy.signature!)}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        transaction
-                      </a>
+                      <p className="font-medium">
+                        Basis-risk cover paid {review.payout} USDC to the insured
+                        farmer.
+                      </p>
+                      <p className="mt-1 text-sm">
+                        The weather index alone would not pay, but {review.valid}{" "}
+                        valid field reports confirmed drought in this cell. This
+                        cover pays exactly the case the satellite index misses.{" "}
+                        <a
+                          className="link"
+                          href={explorer(review.signature!)}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Payout transaction
+                        </a>
+                      </p>
                     </>
                   ) : (
-                    <>Policy not triggered: {policy.reason}</>
+                    <p>Basis-risk cover not triggered: {review.reason}</p>
                   )}
-                </p>
+                </div>
               ) : null}
             </Step>
           ) : null}

@@ -1,12 +1,10 @@
 import { type Review, reviewPanel } from "@/lib/ai";
 import { computeIndex } from "@/lib/index";
+import { ROUND_POOL_USDC } from "@/lib/payment";
 import { rewards } from "@/lib/scoring";
 import type { RoundResult, Weather } from "@/lib/types";
 import { parseCloseBody } from "@/lib/validation";
 import { climateStatus, fetchWeather } from "@/lib/weather";
-
-/** Unidades del token de prueba que el sponsor pone por ronda (simulado, se declara en la demo). */
-const POOL = Number(process.env.ROUND_POOL ?? 100);
 
 export async function POST(request: Request) {
   let input: unknown;
@@ -28,7 +26,7 @@ export async function POST(request: Request) {
     try {
       weather = await fetchWeather(body.zone);
     } catch (error) {
-      // Sin clima no hay índice: la ronda se suspende hasta que Open-Meteo vuelva (OD-22).
+      // Sin clima no hay índice: la ronda se suspende hasta que Open-Meteo vuelva (OD-25).
       console.error("Open-Meteo no respondió:", error);
       return Response.json(
         { error: "Weather service unavailable: rounds are suspended until it is back." },
@@ -42,7 +40,7 @@ export async function POST(request: Request) {
   try {
     review = await reviewPanel(body.reports, weather, satellite_status);
   } catch (error) {
-    // Sin la revisión de la IA no se juzga a nadie: la ronda se suspende hasta que vuelva (OD-23).
+    // Sin la revisión de la IA no se juzga a nadie: la ronda se suspende hasta que vuelva (OD-26).
     console.error("La revisión con IA no está disponible:", error);
     return Response.json(
       { error: "AI review unavailable: rounds are suspended until it is back." },
@@ -59,7 +57,7 @@ export async function POST(request: Request) {
     divergence: satellite_status !== panel_status,
     weather,
     flags: review.flags,
-    scores: rewards(body.reports, review.flags, POOL),
+    scores: rewards(body.reports, review.flags, ROUND_POOL_USDC),
     explanation: review.explanation,
     model: review.model,
   };

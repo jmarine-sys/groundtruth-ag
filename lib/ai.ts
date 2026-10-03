@@ -38,7 +38,7 @@ export interface Review {
   model: string;
 }
 
-/** Sin revisión de la IA no se juzga a nadie: la ronda se suspende (OD-23). */
+/** Sin revisión de la IA no se juzga a nadie: la ronda se suspende (OD-26). */
 export class ReviewUnavailableError extends Error {}
 
 /**
