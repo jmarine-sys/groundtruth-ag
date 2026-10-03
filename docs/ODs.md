@@ -53,7 +53,7 @@ It is the counterpart of [ADRs.md](ADRs.md): there is **what was decided and why
 | OD-13 | GitHub remote | `decision` | DECIDED | Public repo `git@github.com:jmarine-sys/groundtruth-ag.git`; branches `main`, `dev-a`, `dev-b` | — |
 | OD-14 | Transaction version for the browser wallet | `decision` | DECIDED | Browser client sends v0 (memo fits in 1232 bytes; no dependency on wallet v1 support); server sends v1 ([app/providers.tsx](../app/providers.tsx), [lib/solana-server.ts](../lib/solana-server.ts)) | — |
 | OD-15 | `/api/payout` and `/api/policy` trust the RoundResult sent by the browser | `debt` | OPEN | Capped by the round pool, devnet test token only; moves onchain with OD-02 | any launch beyond devnet |
-| OD-16 | Devnet SOL for the server wallet | `risk` | NEEDS-INPUT | Public faucet airdrop was rejected on 2026-10-03; needs a manual top-up at faucet.solana.com for `Cv9Nos5wnwc2N4LmoZBMMbcvi2tFLUZqGtuC9gBBdwSm` | T2.2, `npm run setup:devnet` |
+| OD-16 | Devnet SOL for the server wallet | `risk` | DECIDED | Public faucet rejected the airdrop; funded by a manual transfer from the team wallet on 2026-10-03 (~1 SOL on `Cv9Nos5wnwc2N4LmoZBMMbcvi2tFLUZqGtuC9gBBdwSm`, 100,000 GTT minted). Reservation: top up again if many demo runs drain it | — |
 | OD-17 | What stands in for the satellite index in the demo | `decision` | DECIDED | Open-Meteo rainfall and soil moisture (weather models), labelled "Weather index" in the UI; in production the panel audits the insurer's own satellite index for the same grid cell. MODIS NDVI rejected for today: weeks of lag | — |
 | OD-18 | Report location and grid cell | `risk` | OPEN | Zone is hardcoded to Pergamino in [lib/weather.ts](../lib/weather.ts); reports carry no location. Needs geolocation + ~20 km cell + contract change with Dev B; GPS spoofing unaddressed | multi-zone, comparing each report with its cell |
 | OD-19 | Who closes a round and when | `decision` | DECIDED | Rounds close on a fixed deadline (Monday 12:00 ART), not at an informant's or operator's choice; the demo closes manually and says so in the UI. Permissionless close after the deadline arrives with OD-02 | — |
@@ -62,8 +62,8 @@ It is the counterpart of [ADRs.md](ADRs.md): there is **what was decided and why
 
 ## The state of the project, read off the register
 
-19 items: 9 decided, 0 leaning, 5 blocked on input this team does not produce yet (API key, insurer
-answer, legal opinion, official rules, devnet SOL), 5 open. The five `NEEDS-INPUT` items do not unblock
+19 items: 10 decided, 0 leaning, 4 blocked on input this team does not produce yet (API key, insurer
+answer, legal opinion, official rules), 5 open. The four `NEEDS-INPUT` items do not unblock
 by coding longer — they unblock by asking someone.
 
 ---
