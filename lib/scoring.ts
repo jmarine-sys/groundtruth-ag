@@ -63,28 +63,16 @@ export function rewards(
 }
 
 /**
- * Plan B sin IA: marca a quien contradice a la mayoría del panel y al clima a la vez.
- * Es la misma regla que se usa si Claude falla o no hay clave.
+ * Colusión: una nota idéntica a la de otro informante anterior (sin importar mayúsculas
+ * ni espacios). Una nota vacía no es copia de nadie. Se suma a la revisión de la IA;
+ * sin IA la ronda no se cierra (OD-20).
  */
-export function ruleBasedFlags(
-  reports: Report[],
-  climateSaysBelow: boolean,
-): Flag[] {
-  const below = reports.filter((r) => r.signal === "below").length;
-  const majority = below * 2 > reports.length ? "below" : "normal";
-  const contrarian = reports
-    .filter((r) => r.signal !== majority)
-    .filter((r) => (r.signal === "below") !== climateSaysBelow)
-    .map((r) => ({
-      wallet: r.wallet,
-      reason: `Reports "${r.signal}" against both the panel majority ("${majority}") and the weather data.`,
-    }));
-
-  // Colusión: una nota idéntica a la de otro informante anterior.
+export function copiedNoteFlags(reports: Report[]): Flag[] {
   const seen = new Map<string, string>();
   const copied: Flag[] = [];
   for (const r of [...reports].sort((a, b) => a.ts.localeCompare(b.ts))) {
-    const key = r.note.trim().toLowerCase();
+    const key = r.note.trim().toLowerCase().replace(/\s+/g, " ");
+    if (!key) continue;
     const original = seen.get(key);
     if (original) {
       copied.push({ wallet: r.wallet, reason: `Copies word for word the note of informant ${short(original)}.` });
@@ -92,9 +80,7 @@ export function ruleBasedFlags(
       seen.set(key, r.wallet);
     }
   }
-
-  const flagged = new Set(contrarian.map((f) => f.wallet));
-  return [...contrarian, ...copied.filter((f) => !flagged.has(f.wallet))];
+  return copied;
 }
 
 function short(wallet: string): string {

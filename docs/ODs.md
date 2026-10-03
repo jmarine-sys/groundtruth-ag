@@ -43,8 +43,8 @@ It is the counterpart of [ADRs.md](ADRs.md): there is **what was decided and why
 | OD-03 | Who sets the index number | `decision` | DECIDED | Fixed formula `0.5 × climate stress + 0.5 × panel consensus`; AI only flags reports and explains ([lib/index.ts](../lib/index.ts), [lib/ai.ts](../lib/ai.ts)). Why: Res. SSN 315/2026 requires an independent actuary to validate the index | — |
 | OD-04 | Index weights (0.5/0.5) and dry threshold (`DRY_RATIO = 0.6`) | `debt` | OPEN | Chosen by hand, not calibrated against any historical series | an insurer conversation |
 | OD-05 | What the fake report in the demo looks like | `decision` | DECIDED | A copied note (collusion), because real weather in Pergamino on 2026-10-03 was normal: 48.5 mm in 30 days vs 34.7 mm 5-year mean (POST /api/round/close, open-meteo) — a "normal" dissenter would not look suspicious ([lib/fixtures.ts](../lib/fixtures.ts)) | T3.2 |
-| OD-06 | Claude model and effort in `lib/ai.ts` | `decision` | NEEDS-INPUT | Leaning `claude-opus-5-5` at effort `low`; never called — no `ANTHROPIC_API_KEY` yet. Falls back to `rule-based` without it | T2.1 |
-| OD-07 | Server-side refusal fallback for Claude | `debt` | OPEN | Not enabled; a refusal currently drops to the rule-based review | — |
+| OD-06 | Claude model and effort in `lib/ai.ts` | `decision` | DECIDED | Team chose the cheapest model that does the job: `claude-haiku-4-5`, no `effort` (Haiku 4.5 rejects it). Team key in `.env.local`; first real round on 2026-10-03 returned in ~8 s with the copied note flagged ([lib/ai.ts](../lib/ai.ts)). Reservation: review quality judged on one round only | — |
+| OD-07 | Server-side refusal fallback for Claude | `decision` | DECIDED | Not used: the documented `fallbacks` support covers the Opus/Sonnet/Fable lines, not Haiku 4.5, and an unsupported request would suspend every round. A refusal suspends the round (OD-20) | — |
 | OD-08 | Wallet onboarding for non-crypto informants | `decision` | DECIDED | Phantom on devnet for today; email login deferred ([04-plan.md](../proyecto/04-plan.md)) | real informant tests |
 | OD-09 | Will insurers or cooperatives pay for a base-risk audit | `risk` | NEEDS-INPUT | Zero conversations so far; T2.4 asks it | pitch business slide |
 | OD-10 | Fewer than 3 real informants per zone | `risk` | OPEN | RBTS degrades below n=3; demo panel is synthetic and declared as such | T2.4, traction claim |
@@ -54,13 +54,17 @@ It is the counterpart of [ADRs.md](ADRs.md): there is **what was decided and why
 | OD-14 | Transaction version for the browser wallet | `decision` | DECIDED | Browser client sends v0 (memo fits in 1232 bytes; no dependency on wallet v1 support); server sends v1 ([app/providers.tsx](../app/providers.tsx), [lib/solana-server.ts](../lib/solana-server.ts)) | — |
 | OD-15 | `/api/payout` and `/api/policy` trust the RoundResult sent by the browser | `debt` | OPEN | Capped by the round pool, devnet test token only; moves onchain with OD-02 | any launch beyond devnet |
 | OD-16 | Devnet SOL for the server wallet | `risk` | NEEDS-INPUT | Public faucet airdrop was rejected on 2026-10-03; needs a manual top-up at faucet.solana.com for `Cv9Nos5wnwc2N4LmoZBMMbcvi2tFLUZqGtuC9gBBdwSm` | T2.2, `npm run setup:devnet` |
+| OD-17 | Duplicate and malformed reports in a round | `decision` | DECIDED | One report per wallet per round; empty notes, invalid addresses and out-of-range values are rejected with 400 before scoring, so nobody is paid twice in a round ([lib/validation.ts](../lib/validation.ts)). Reservation: rounds are not stored, so a wallet can still report in another round | — |
+| OD-18 | How many times a wallet can be paid per day | `decision` | OPEN | Team has not chosen a limit; enforcing any limit across rounds needs storage or the Anchor program (OD-02) | any launch beyond devnet |
+| OD-19 | Open-Meteo unavailable | `decision` | DECIDED | No fallback data: after 8 s per request the round is suspended with 503 until the service is back. Replaces the "fixed historical drought" plan B in [04-plan.md](../proyecto/04-plan.md) ([lib/weather.ts](../lib/weather.ts), [app/api/round/close/route.ts](../app/api/round/close/route.ts)) | — |
+| OD-20 | Claude unavailable (no credentials, no answer, refusal, or no valid review) | `decision` | DECIDED | No verdict without the AI: nobody is flagged or paid by a fallback rule; the round is suspended with 503 until it is back. The rule-based fallback was removed. When Claude answers, a fixed copied-note check is still added to its flags ([lib/ai.ts](../lib/ai.ts), [app/api/round/close/route.ts](../app/api/round/close/route.ts)) | — |
 
 ---
 
 ## The state of the project, read off the register
 
-16 items: 6 decided, 0 leaning, 5 blocked on input this team does not produce yet (API key, insurer
-answer, legal opinion, official rules, devnet SOL), 5 open. The five `NEEDS-INPUT` items do not unblock
+20 items: 11 decided, 0 leaning, 4 blocked on input this team does not produce yet (insurer
+answer, legal opinion, official rules, devnet SOL), 5 open. The four `NEEDS-INPUT` items do not unblock
 by coding longer — they unblock by asking someone.
 
 ---

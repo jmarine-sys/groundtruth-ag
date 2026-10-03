@@ -36,7 +36,7 @@ Por qué cadena: registro que ni la aseguradora ni el productor controlan, pagos
 | Transacciones en devnet (Memo + transferencias) | Real |
 | Datos de clima (Open-Meteo, sin clave) | Real |
 | Puntaje de peer prediction | Real (cálculo) |
-| Detección del reporte falso con IA (Claude) | Real; plan B regla simple, se declara |
+| Detección del reporte falso con IA (Claude) | Real; si Claude no está disponible la ronda se suspende, sin plan B (OD-20) |
 | 4 informantes precargados | Simulado, se dice a cámara |
 | Fondo del sponsor y póliza de demo | Simulado, se dice a cámara |
 | Sequía para mostrar la divergencia | Datos históricos o fijados a mano, se dice a cámara |
@@ -44,7 +44,7 @@ Por qué cadena: registro que ni la aseguradora ni el productor controlan, pagos
 ## Riesgo técnico a probar primero
 
 - Dev A: firmar una transacción Memo desde Phantom en devnet (30 min).
-- Dev B: que la API de Claude responda con la clave del equipo. Si no hay clave → regla simple de outlier y se declara.
+- Dev B: que la API de Claude responda con la clave del equipo. Sin clave no cierra ninguna ronda (OD-20): es bloqueante para la demo.
 
 ## Definición de listo
 
