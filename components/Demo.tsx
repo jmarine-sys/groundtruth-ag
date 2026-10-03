@@ -416,32 +416,27 @@ function Flow({ client }: { client: AppClient }) {
               </div>
 
               {payout ? (
-                <ul className="mt-3 space-y-1 text-sm">
-                  <li>
-                    Index published:{" "}
+                <div className="mt-3 text-sm">
+                  <p>
+                    Index published and {payout.payments.length} informants
+                    paid in one transaction ·{" "}
                     <a
                       className="link"
                       href={explorer(payout.index_sig)}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      memo transaction
+                      view on Solana Explorer
                     </a>
-                  </li>
-                  {payout.payments.map((p) => (
-                    <li key={p.signature}>
-                      {p.reward} SOL → <code>{short(p.wallet)}</code> ·{" "}
-                      <a
-                        className="link"
-                        href={explorer(p.signature)}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        transaction
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+                  </p>
+                  <ul className="mt-1 space-y-1">
+                    {payout.payments.map((p) => (
+                      <li key={p.wallet}>
+                        {p.reward} SOL → <code>{short(p.wallet)}</code>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ) : null}
               {review ? (
                 <div

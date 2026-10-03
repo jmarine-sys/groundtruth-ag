@@ -1,7 +1,7 @@
 import { address, isAddress } from "@solana/kit";
 import { indexMemo } from "@/lib/hash";
 import { MIN_TRANSFER_SOL, ROUND_POOL_SOL } from "@/lib/payment";
-import { payWithMemo, writeMemo } from "@/lib/solana-server";
+import { payManyWithMemo } from "@/lib/solana-server";
 import type { RoundResult } from "@/lib/types";
 
 // Paga la recompensa de cada informante en SOL de devnet y publica el índice
@@ -18,14 +18,13 @@ export async function POST(request: Request) {
 
   try {
     const memo = await indexMemo(result);
-    const index_sig = await writeMemo(memo);
-    const payments = [];
-    // En serie: cada pago es una transacción visible en el explorador.
-    for (const s of payable) {
-      const signature = await payWithMemo(address(s.wallet), s.reward, `groundtruth:reward:${result.zone}`);
-      payments.push({ wallet: s.wallet, reward: s.reward, signature });
-    }
-    return Response.json({ index_sig, memo, payments });
+    // Índice publicado y todos los pagos en una sola transacción (ver payManyWithMemo).
+    const signature = await payManyWithMemo(
+      payable.map((s) => ({ recipient: address(s.wallet), amount: s.reward })),
+      memo,
+    );
+    const payments = payable.map((s) => ({ wallet: s.wallet, reward: s.reward, signature }));
+    return Response.json({ index_sig: signature, memo, payments });
   } catch (error) {
     console.error(error);
     return Response.json({ error: `Falló el envío en devnet: ${(error as Error).message}` }, { status: 502 });
