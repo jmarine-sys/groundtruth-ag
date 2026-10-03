@@ -22,7 +22,8 @@ export function LotMap() {
         [zone.lat + zone.halfLat, zone.lon + zone.halfLon],
       );
 
-      map = L.map(ref.current, { scrollWheelZoom: false }).fitBounds(cell.pad(0.15));
+      // En pantallas táctiles el mapa no se arrastra con un dedo: así el scroll de la página no queda atrapado.
+      map = L.map(ref.current, { scrollWheelZoom: false, dragging: !L.Browser.mobile }).fitBounds(cell.pad(0.15));
       L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 18,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -31,10 +32,10 @@ export function LotMap() {
       L.rectangle(cell, { color: "#15803d", weight: 2, fillOpacity: 0.06 })
         .bindTooltip(`Index grid cell · ${zone.name} · ~20 × 20 km`)
         .addTo(map);
-      L.circleMarker([zone.lat, zone.lon], { radius: 5, color: "#2563eb", fillOpacity: 0.9 })
+      L.circleMarker([zone.lat, zone.lon], { radius: 5, color: "#1c2a1f", fillOpacity: 0.9 })
         .bindTooltip("Weather data point (cell center)")
         .addTo(map);
-      L.circleMarker([DEMO_LOT.lat, DEMO_LOT.lon], { radius: 9, color: "#b45309", fillOpacity: 0.8 })
+      L.circleMarker([DEMO_LOT.lat, DEMO_LOT.lon], { radius: 9, color: "#b7802f", fillOpacity: 0.85 })
         .bindTooltip(DEMO_LOT.label, { permanent: true, direction: "top" })
         .addTo(map);
     });
@@ -47,12 +48,12 @@ export function LotMap() {
 
   return (
     <div>
-      <div ref={ref} className="h-64 w-full rounded-xl border border-black/10 lg:h-[26rem]" />
-      <p className="mt-1 text-xs text-neutral-500">
+      <div ref={ref} role="img" aria-label="Map of your registered lot inside its 20 km index grid cell near Pergamino" className="h-64 w-full rounded-xl border border-black/10 lg:h-[26rem]" />
+      <p className="mt-2 text-xs text-neutral-600">
         Your lot was registered when your account was created. Your report is compared with the index for the
         green ~20 km grid cell it falls in.{" "}
-        <span className="inline-block h-2 w-2 rounded-full bg-amber-700" /> your lot ·{" "}
-        <span className="inline-block h-2 w-2 rounded-full bg-blue-600" /> weather data point
+        <span className="inline-block h-2 w-2 rounded-full bg-soil-500" /> your lot ·{" "}
+        <span className="inline-block h-2 w-2 rounded-full bg-[#1c2a1f]" /> weather data point
       </p>
     </div>
   );

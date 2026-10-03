@@ -106,3 +106,29 @@ export const IconShield = (p: IconProps) => (
     <path d="m9 12 2 2 4-4" />
   </Base>
 );
+
+export const IconNotEqual = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M5 9h14M5 15h14M16 4 8 20" />
+  </Base>
+);
+
+export const IconEqual = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M5 9h14M5 15h14" />
+  </Base>
+);
+
+export const IconArrowRight = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M5 12h14M13 6l6 6-6 6" />
+  </Base>
+);
+
+export const IconRefresh = (p: IconProps) => (
+  <Base {...p}>
+    <path d="M20 11a8 8 0 0 0-14.3-4.9L4 8" />
+    <path d="M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16" />
+    <path d="M20 20v-4h-4" />
+  </Base>
+);
