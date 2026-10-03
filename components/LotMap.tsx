@@ -47,7 +47,7 @@ export function LotMap() {
 
   return (
     <div>
-      <div ref={ref} className="h-64 w-full rounded border border-neutral-200 dark:border-neutral-800" />
+      <div ref={ref} className="h-64 w-full rounded-xl border border-black/10 lg:h-[26rem]" />
       <p className="mt-1 text-xs text-neutral-500">
         Your lot was registered when your account was created. Your report is compared with the index for the
         green ~20 km grid cell it falls in.{" "}

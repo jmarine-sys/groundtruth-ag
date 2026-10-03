@@ -1,36 +1,59 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* Paleta de la marca: verde campo, tierra y cielo. Tema claro fijo para que la demo
+   se vea igual en el video y en la máquina de cualquier jurado. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: #f7f8f3;
+  --color-foreground: #1c2a1f;
+  --color-brand-50: #eef7ee;
+  --color-brand-100: #d6ecd6;
+  --color-brand-200: #acd8ae;
+  --color-brand-500: #3f8f4a;
+  --color-brand-600: #2f7a3b;
+  --color-brand-700: #24612f;
+  --color-brand-900: #143a1c;
+  --color-soil-50: #fbf6ec;
+  --color-soil-100: #f3e6c8;
+  --color-soil-500: #b7802f;
+  --color-soil-700: #7d5418;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(1200px 500px at 85% -10%, #e4f1df 0%, transparent 60%),
+    radial-gradient(900px 400px at -10% 0%, #f6ecd6 0%, transparent 55%),
+    var(--color-background);
+  background-attachment: fixed;
+  color: var(--color-foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+.card {
+  @apply rounded-2xl border border-black/5 bg-white/90 shadow-sm backdrop-blur;
 }
 
 .btn {
-  @apply rounded bg-green-700 px-3 py-2 text-sm font-medium text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:opacity-40;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-40;
 }
-.btn-secondary {
-  @apply rounded border border-neutral-300 px-3 py-1 text-sm hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-900;
+
+.btn-ghost {
+  @apply inline-flex items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50;
 }
+
 .link {
-  @apply text-green-700 underline dark:text-green-400;
+  @apply font-medium text-brand-700 underline decoration-brand-200 underline-offset-2 hover:decoration-brand-600;
+}
+
+.chip {
+  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+.eyebrow {
+  @apply text-xs font-semibold uppercase tracking-[0.12em];
 }
