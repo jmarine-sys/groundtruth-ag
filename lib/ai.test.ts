@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { seedReports } from "./fixtures";
 
 // Claude simulado: los tests nunca llaman a la API real ni gastan créditos.
@@ -14,7 +14,25 @@ import { mergeFlags, panelSummary, reviewPanel, ReviewUnavailableError } from ".
 const reports = seedReports(["A1", "B2", "C3", "D4"], "2026-10-03T15:00:00Z");
 const weather = { source: "fixed" as const, soil_moisture: 0.27, precip_30d_mm: 58, baseline_30d_mm: 61 };
 
-beforeEach(() => parse.mockReset());
+const savedKey = process.env.ANTHROPIC_API_KEY;
+beforeEach(() => {
+  parse.mockReset();
+  process.env.ANTHROPIC_API_KEY = "test-key";
+});
+afterEach(() => {
+  process.env.ANTHROPIC_API_KEY = savedKey;
+});
+
+describe("sin clave de Claude (workaround de demo)", () => {
+  it("revisa con la regla fija, marca la nota copiada y no llama a Claude", async () => {
+    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.ANTHROPIC_AUTH_TOKEN;
+    const review = await reviewPanel(reports, weather, "normal");
+    expect(parse).not.toHaveBeenCalled();
+    expect(review.model).toBe("rule-based (no Claude key)");
+    expect(review.flags.map((f) => f.wallet)).toEqual(["D4"]);
+  });
+});
 
 describe("mergeFlags", () => {
   it("deja una sola marca por wallet y gana la primera", () => {

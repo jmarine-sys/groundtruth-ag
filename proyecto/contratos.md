@@ -53,7 +53,7 @@ Respuesta (`RoundResult`):
 }
 ```
 
-- `model`: el modelo de Claude que hizo la revisión, tal como lo informa la API (hoy `claude-haiku-4-5-20251001`, OD-06).
+- `model`: el modelo de Claude que hizo la revisión, tal como lo informa la API (hoy `claude-haiku-4-5-20251001`, OD-06), o `rule-based (no Claude key)` si el servidor no tiene credenciales de Claude (OD-26).
 - `weather`: `source` es `"open-meteo"` o `"fixed"`; `soil_moisture` (m³/m³, puede ser `null`); `precip_30d_mm` es la lluvia de los últimos 30 días y `baseline_30d_mm` el promedio de esa ventana en los 5 años anteriores. Es la forma de `lib/types.ts`, que ya usa la pantalla de Dev A.
 - `index`: 0 (sin estrés) a 1 (estrés severo). Fórmula fija (OD-03): `0.5 * estrés climático + 0.5 * proporción del panel que dice "below"`, sin contar los reportes marcados. La IA no define el número: solo marca reportes y escribe `explanation`.
 - `reward`: SOL de devnet a transferir a cada wallet, redondeado hacia abajo a 0,0001 SOL; el total no pasa del fondo de la ronda, `ROUND_POOL_SOL` (0,02 por defecto). Dev A no envía montos menores a 0,001 SOL, el mínimo para que exista una cuenta nueva (OD-21).

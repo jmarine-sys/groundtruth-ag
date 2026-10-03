@@ -50,6 +50,7 @@ export async function reviewPanel(
   weather: Weather,
   climate: Signal,
 ): Promise<Review> {
+  if (!hasClaudeCredentials()) return ruleBasedReview(reports, weather, climate);
   const response = await requestReview(reports, weather, climate).catch((error: unknown) => {
     throw new ReviewUnavailableError(`Claude did not respond: ${(error as Error).message}`);
   });
@@ -109,6 +110,35 @@ async function requestReview(reports: Report[], weather: Weather, climate: Signa
       },
     ],
   });
+}
+
+/**
+ * Workaround para correr la demo sin clave de Claude (OD-26): solo cuando no hay
+ * credenciales configuradas. Si hay clave y Claude falla o se niega, la ronda se sigue
+ * suspendiendo. La pantalla muestra "rule-based (no Claude key)".
+ */
+export function hasClaudeCredentials(): boolean {
+  return Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN);
+}
+
+export function ruleBasedReview(reports: Report[], weather: Weather, climate: Signal): Review {
+  const below = reports.filter((r) => r.signal === "below").length;
+  const majority: Signal = below * 2 > reports.length ? "below" : "normal";
+  // Contradice a la mayoría del panel y también al clima: sin razón visible para disentir.
+  const contrarian = reports
+    .filter((r) => r.signal !== majority && r.signal !== climate)
+    .map((r) => ({
+      wallet: r.wallet,
+      reason: `Reports "${r.signal}" against both the panel majority ("${majority}") and the weather data.`,
+    }));
+  const flags = mergeFlags(copiedNoteFlags(reports), contrarian);
+  return {
+    flags,
+    explanation:
+      `${panelSummary(reports, flags)} Weather data shows ${weather.precip_30d_mm} mm of rain in 30 days ` +
+      `vs a ${weather.baseline_30d_mm} mm average.`,
+    model: "rule-based (no Claude key)",
+  };
 }
 
 /** Une listas de marcas: una sola por wallet, gana la primera que aparece. */
