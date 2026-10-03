@@ -142,11 +142,17 @@ function Flow({ client }: { client: AppClient }) {
             ))}
           </div>
           <label className="block">
-            What % of other agronomists will say “below normal”? <b>{predicted}%</b>
+            Your guess: out of 10 agronomists in this zone, how many will answer “below normal”?{" "}
+            <b>{Math.round(predicted / 10)} of 10</b>
+            <span className="block text-xs text-neutral-500">
+              Nobody knows the exact number. Answer what you honestly expect: the payout rewards honest reports and
+              good guesses, so exaggerating does not pay.
+            </span>
             <input
               type="range"
               min={0}
               max={100}
+              step={10}
               value={predicted}
               onChange={(e) => setPredicted(Number(e.target.value))}
               className="w-full"
@@ -212,6 +218,7 @@ function Flow({ client }: { client: AppClient }) {
         >
           {busy === "close" ? "Closing round…" : "Close round"}
         </button>
+        <p className="mt-1 text-xs text-neutral-500">Closing the round shows the index, the flagged reports and the payouts below.</p>
       </Step>
 
       {result ? (
