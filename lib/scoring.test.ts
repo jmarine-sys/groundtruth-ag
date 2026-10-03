@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { seedReports } from "./fixtures";
 import { computeIndex } from "./index";
-import { rbtsScores, rewards, ruleBasedFlags } from "./scoring";
+import { copiedNoteFlags, rbtsScores, rewards } from "./scoring";
 import type { Report } from "./types";
 
 const wallets = ["A1", "B2", "C3", "D4", "E5"];
@@ -35,16 +35,21 @@ describe("rewards", () => {
   });
 });
 
-describe("ruleBasedFlags", () => {
+describe("copiedNoteFlags", () => {
   it("marca al que copia la nota de otro informante", () => {
-    const flags = ruleBasedFlags(panel(), false);
-    expect(flags.map((f) => f.wallet)).toEqual(["D4"]);
+    expect(copiedNoteFlags(panel()).map((f) => f.wallet)).toEqual(["D4"]);
   });
 
-  it("marca al que contradice al panel y al clima", () => {
-    const reports = panel().map((r) => (r.wallet === "B2" ? { ...r, signal: "normal" as const } : r));
-    const flags = ruleBasedFlags(reports, true);
-    expect(flags.map((f) => f.wallet)).toContain("B2");
+  it("no toma dos notas vacías como copia", () => {
+    const reports = panel().map((r) => (r.wallet === "B2" || r.wallet === "C3" ? { ...r, note: "  " } : r));
+    expect(copiedNoteFlags(reports).map((f) => f.wallet)).toEqual(["D4"]);
+  });
+
+  it("detecta la copia aunque cambien mayúsculas o espacios", () => {
+    const reports = panel().map((r) =>
+      r.wallet === "D4" ? { ...r, note: `  ${r.note.toUpperCase().replace(" ", "   ")} ` } : r,
+    );
+    expect(copiedNoteFlags(reports).map((f) => f.wallet)).toEqual(["D4"]);
   });
 });
 

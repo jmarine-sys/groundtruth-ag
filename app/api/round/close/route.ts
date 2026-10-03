@@ -1,27 +1,23 @@
-import { reviewPanel } from "@/lib/ai";
+import { type Review, reviewPanel } from "@/lib/ai";
 import { computeIndex } from "@/lib/index";
+import { ROUND_POOL_USDC } from "@/lib/payment";
 import { rewards } from "@/lib/scoring";
-import type { Report, RoundResult, Weather } from "@/lib/types";
-import { climateStatus, fetchWeather, ZONES } from "@/lib/weather";
-
-/** Unidades del token de prueba que el sponsor pone por ronda (simulado, se declara en la demo). */
-const POOL = Number(process.env.ROUND_POOL ?? 100);
-
-interface CloseBody {
-  zone: string;
-  reports: Report[];
-  /** Solo para la demo: fija el clima (por ejemplo, una sequía histórica). Se declara a cámara. */
-  weather_override?: Omit<Weather, "source">;
-}
+import type { RoundResult, Weather } from "@/lib/types";
+import { parseCloseBody } from "@/lib/validation";
+import { climateStatus, fetchWeather } from "@/lib/weather";
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as CloseBody;
-  if (!ZONES[body.zone]) {
-    return Response.json({ error: `Zona desconocida: ${body.zone}` }, { status: 400 });
+  let input: unknown;
+  try {
+    input = await request.json();
+  } catch {
+    return Response.json({ error: "Body is not valid JSON" }, { status: 400 });
   }
-  if (!Array.isArray(body.reports) || body.reports.length === 0) {
-    return Response.json({ error: "La ronda no tiene reportes" }, { status: 400 });
+  const parsed = parseCloseBody(input);
+  if (!parsed.ok) {
+    return Response.json({ error: `Invalid round: ${parsed.error}` }, { status: 400 });
   }
+  const body = parsed.body;
 
   let weather: Weather;
   if (body.weather_override) {
@@ -30,15 +26,27 @@ export async function POST(request: Request) {
     try {
       weather = await fetchWeather(body.zone);
     } catch (error) {
+      // Sin clima no hay índice: la ronda se suspende hasta que Open-Meteo vuelva (OD-25).
+      console.error("Open-Meteo no respondió:", error);
       return Response.json(
-        { error: `No se pudo leer el clima: ${(error as Error).message}` },
-        { status: 502 },
+        { error: "Weather service unavailable: rounds are suspended until it is back." },
+        { status: 503 },
       );
     }
   }
 
   const satellite_status = climateStatus(weather);
-  const review = await reviewPanel(body.reports, weather, satellite_status);
+  let review: Review;
+  try {
+    review = await reviewPanel(body.reports, weather, satellite_status);
+  } catch (error) {
+    // Sin la revisión de la IA no se juzga a nadie: la ronda se suspende hasta que vuelva (OD-26).
+    console.error("La revisión con IA no está disponible:", error);
+    return Response.json(
+      { error: "AI review unavailable: rounds are suspended until it is back." },
+      { status: 503 },
+    );
+  }
   const { index, panel_status } = computeIndex(body.reports, review.flags, weather);
 
   const result: RoundResult = {
@@ -49,7 +57,7 @@ export async function POST(request: Request) {
     divergence: satellite_status !== panel_status,
     weather,
     flags: review.flags,
-    scores: rewards(body.reports, review.flags, POOL),
+    scores: rewards(body.reports, review.flags, ROUND_POOL_USDC),
     explanation: review.explanation,
     model: review.model,
   };

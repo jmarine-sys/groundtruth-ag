@@ -1,14 +1,14 @@
 import type { Signal, Weather } from "./types";
+import { ZONES } from "./zones";
 
-// Zonas de la demo. Por ahora una sola.
-export const ZONES: Record<string, { lat: number; lon: number; name: string }> = {
-  pergamino: { lat: -33.89, lon: -60.57, name: "Pergamino, Buenos Aires" },
-};
+export { ZONES };
 
 const TZ = "America%2FArgentina%2FBuenos_Aires";
 const BASELINE_YEARS = 5;
 /** Lluvia de los últimos 30 días por debajo de este % del promedio = estrés hídrico. */
 const DRY_RATIO = 0.6;
+/** Tiempo máximo de espera por cada consulta a Open-Meteo. */
+const TIMEOUT_MS = 8000;
 
 /**
  * Clima real de Open-Meteo (sin clave): lluvia de los últimos 30 días contra el
@@ -63,7 +63,8 @@ export function climateStress(w: Weather): number {
 }
 
 async function getJson(url: string) {
-  const res = await fetch(url, { cache: "no-store" });
+  // Si Open-Meteo no contesta a tiempo, se corta y la ronda se suspende (no queda colgada).
+  const res = await fetch(url, { cache: "no-store", signal: AbortSignal.timeout(TIMEOUT_MS) });
   if (!res.ok) throw new Error(`Open-Meteo respondió ${res.status}`);
   return res.json();
 }
