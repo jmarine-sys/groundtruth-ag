@@ -13,7 +13,7 @@ Guion (5 pasos):
 1. La agrónoma conecta Phantom (devnet) y carga su reporte: trigo, "por debajo de lo normal", y qué % de los demás cree que dirá lo mismo.
 2. Firma: el reporte queda registrado en Solana con fecha y hora (hash en un Memo).
 3. Se cierra la ronda con 5 reportes (4 precargados + 1 falso a propósito). La IA marca el falso.
-4. Se calcula el puntaje de cada informante y cada uno cobra en USDC de devnet.
+4. Se calcula el puntaje de cada informante y cada uno cobra en SOL de devnet (en producción, USDC).
 5. Se ve el índice: clima normal / panel sequía → divergencia → con 3 o más reportes válidos, la cobertura de riesgo base paga sola al asegurado. Links al explorador.
 
 ## Tipo de producto y flujo central

@@ -364,7 +364,7 @@ function Flow({ client }: { client: AppClient }) {
                   <tr className="text-left">
                     <th>Informant</th>
                     <th>Score</th>
-                    <th>Reward (USDC)</th>
+                    <th>Reward (SOL)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -430,7 +430,7 @@ function Flow({ client }: { client: AppClient }) {
                   </li>
                   {payout.payments.map((p) => (
                     <li key={p.signature}>
-                      {p.reward} USDC → <code>{short(p.wallet)}</code> ·{" "}
+                      {p.reward} SOL → <code>{short(p.wallet)}</code> ·{" "}
                       <a
                         className="link"
                         href={explorer(p.signature)}
@@ -454,7 +454,7 @@ function Flow({ client }: { client: AppClient }) {
                   {review.paid ? (
                     <>
                       <p className="font-medium">
-                        Basis-risk cover paid {review.payout} USDC to the insured
+                        Basis-risk cover paid {review.payout} SOL to the insured
                         farmer.
                       </p>
                       <p className="mt-1 text-sm">

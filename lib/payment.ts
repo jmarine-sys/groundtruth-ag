@@ -1,20 +1,26 @@
-// Moneda de pago de la demo: USDC de devnet (Circle, programa SPL Token, 6 decimales).
-// Verificado en developers.circle.com/stablecoins/usdc-contract-addresses y en la cadena.
-// Es plata de prueba: se pide gratis en https://faucet.circle.com (red Solana Devnet).
+// Moneda de pago de la demo: SOL de devnet (OD-21). Es plata de prueba.
+// En producción los informantes y el asegurado cobrarían en USDC (valor estable);
+// para la demo se usa SOL porque la wallet del servidor ya tiene fondos y no hay que
+// crear cuentas de token para cada destinatario.
 
 export const PAYMENT = {
-  symbol: "USDC",
-  mint: process.env.NEXT_PUBLIC_PAYMENT_MINT ?? "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
-  decimals: 6,
+  symbol: "SOL",
+  decimals: 9,
 } as const;
 
-/** Monto en USDC (por ejemplo 0.24) a unidades mínimas del token. */
-export function toBaseUnits(amount: number): bigint {
+/** Monto en SOL (por ejemplo 0.0051) a lamports. */
+export function toLamports(amount: number): bigint {
   return BigInt(Math.round(amount * 10 ** PAYMENT.decimals));
 }
 
-/** Fondo de recompensas por ronda, en USDC. Lo pone el cliente (simulado en la demo). */
-export const ROUND_POOL_USDC = Number(process.env.ROUND_POOL_USDC ?? 1);
+/** Fondo de recompensas por ronda, en SOL. Lo pone el cliente (simulado en la demo). */
+export const ROUND_POOL_SOL = Number(process.env.ROUND_POOL_SOL ?? 0.02);
 
-/** Pago de la cobertura de riesgo base de demo, en USDC. */
-export const COVER_PAYOUT_USDC = Number(process.env.COVER_PAYOUT_USDC ?? 2);
+/** Pago de la cobertura de riesgo base de demo, en SOL. */
+export const COVER_PAYOUT_SOL = Number(process.env.COVER_PAYOUT_SOL ?? 0.05);
+
+/**
+ * Una cuenta nueva necesita al menos ~0,00089 SOL para existir en Solana (renta).
+ * Las recompensas por debajo de este mínimo no se envían.
+ */
+export const MIN_TRANSFER_SOL = 0.001;

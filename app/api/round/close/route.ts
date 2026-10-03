@@ -1,6 +1,6 @@
 import { reviewPanel } from "@/lib/ai";
 import { computeIndex } from "@/lib/index";
-import { ROUND_POOL_USDC } from "@/lib/payment";
+import { ROUND_POOL_SOL } from "@/lib/payment";
 import { rewards } from "@/lib/scoring";
 import type { Report, RoundResult, Weather } from "@/lib/types";
 import { climateStatus, fetchWeather, ZONES } from "@/lib/weather";
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     divergence: satellite_status !== panel_status,
     weather,
     flags: review.flags,
-    scores: rewards(body.reports, review.flags, ROUND_POOL_USDC),
+    scores: rewards(body.reports, review.flags, ROUND_POOL_SOL),
     explanation: review.explanation,
     model: review.model,
   };

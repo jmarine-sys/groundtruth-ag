@@ -1,7 +1,7 @@
 // Prepara devnet para la demo (solo devnet: la plata es de mentira).
 // - Crea (o reutiliza) la wallet del servidor que paga recompensas y pólizas.
 // - Le pide SOL de prueba al faucet de devnet.
-// - Muestra el saldo de USDC de devnet del servidor (los pagos son en USDC).
+// - Muestra el saldo de SOL de devnet del servidor (los pagos de la demo son en SOL).
 // - Genera 4 direcciones de informantes precargados y 1 de productor asegurado.
 // Escribe todo en .env.local, que está en .gitignore. Nunca imprime claves privadas.
 //
@@ -11,7 +11,6 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import {
   createClient,
   createKeyPairSignerFromBytes,
-  address,
   generateKeyPairSigner,
   lamports,
 } from "@solana/kit";
@@ -78,22 +77,9 @@ if (balance < lamports(BigInt(200_000_000))) {
   }
 }
 
-// Los pagos son en USDC de devnet (lib/payment.ts). El servidor necesita saldo:
-// se pide gratis en https://faucet.circle.com eligiendo "Solana Devnet".
-const USDC_DEVNET = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
-const { value: tokenAccounts } = await client.rpc
-  .getTokenAccountsByOwner(server.address, { mint: address(USDC_DEVNET) }, { encoding: "jsonParsed" })
-  .send();
-const usdc = tokenAccounts.reduce(
-  (sum, a) => sum + Number(a.account.data.parsed.info.tokenAmount.uiAmount ?? 0),
-  0,
-);
-console.log(`USDC de devnet en la wallet del servidor: ${usdc}`);
-if (usdc < 5) {
-  console.log(
-    `Cargá USDC de prueba en https://faucet.circle.com (red "Solana Devnet") para ${server.address}. Cada ronda de la demo usa ~3 USDC.`,
-  );
-}
+// Los pagos de la demo son en SOL de devnet (lib/payment.ts): cada recorrido usa ~0,07 SOL.
+const { value: after } = await client.rpc.getBalance(server.address).send();
+console.log(`SOL de devnet en la wallet del servidor: ${Number(after) / 1e9}`);
 
 if (!env.get("NEXT_PUBLIC_SEED_WALLETS")) {
   // Solo hacen falta las direcciones: estos informantes no firman, solo cobran.

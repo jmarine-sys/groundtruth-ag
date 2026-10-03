@@ -1,5 +1,5 @@
 import { address } from "@solana/kit";
-import { COVER_PAYOUT_USDC } from "@/lib/payment";
+import { COVER_PAYOUT_SOL } from "@/lib/payment";
 import { payWithMemo } from "@/lib/solana-server";
 import type { RoundResult } from "@/lib/types";
 
@@ -7,7 +7,7 @@ import type { RoundResult } from "@/lib/types";
 // pero un panel válido de al menos MIN_VALID reportes confirma la sequía. Es el caso que
 // el seguro satelital no cubre. Póliza y asegurado de demo, simulados (se declara a cámara).
 const MIN_VALID = 3;
-const PAYOUT = COVER_PAYOUT_USDC;
+const PAYOUT = COVER_PAYOUT_SOL;
 
 export async function POST(request: Request) {
   const { result } = (await request.json()) as { result: RoundResult };

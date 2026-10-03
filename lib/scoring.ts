@@ -40,7 +40,7 @@ export function rbtsScores(reports: Report[]): Map<string, number> {
 
 /**
  * Reparte el fondo de la ronda en proporción al puntaje. Los reportes marcados
- * como sospechosos no cobran. Las recompensas se redondean hacia abajo al centavo de USDC.
+ * como sospechosos no cobran. Las recompensas se redondean hacia abajo a 0,0001 SOL.
  */
 export function rewards(
   reports: Report[],
@@ -57,7 +57,7 @@ export function rewards(
     const reward =
       flagged.has(r.wallet) || total === 0
         ? 0
-        : Math.floor((100 * pool * (raw.get(r.wallet) ?? 0)) / total) / 100;
+        : Math.floor((10_000 * pool * (raw.get(r.wallet) ?? 0)) / total) / 10_000;
     return { wallet: r.wallet, score, reward };
   });
 }
