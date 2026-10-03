@@ -14,7 +14,7 @@ export function toLamports(amount: number): bigint {
 }
 
 /** Fondo de recompensas por ronda, en SOL. Lo pone el cliente (simulado en la demo). */
-export const ROUND_POOL_SOL = Number(process.env.ROUND_POOL_SOL ?? 0.02);
+export const ROUND_POOL_SOL = Number(process.env.ROUND_POOL_SOL ?? 0.1);
 
 /** Pago de la cobertura de riesgo base de demo, en SOL. */
 export const COVER_PAYOUT_SOL = Number(process.env.COVER_PAYOUT_SOL ?? 0.05);

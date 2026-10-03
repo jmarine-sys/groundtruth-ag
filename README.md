@@ -89,7 +89,7 @@ npm run dev            # http://localhost:3000
 npm test
 ```
 
-After `setup:devnet`, send about 0.5 devnet SOL to the printed server wallet address so it can pay rewards. Each full demo run uses about 0.07 SOL.
+After `setup:devnet`, send about 0.5 devnet SOL to the printed server wallet address so it can pay rewards. Each full demo run uses about 0.15 SOL (0.1 SOL reward pool + 0.05 SOL cover).
 
 ### Environment variables
 

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -9,6 +10,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from "react";
+import { address } from "@solana/kit";
 import { getAddMemoInstruction } from "@solana-program/memo";
 import {
   useConnect,
@@ -39,6 +41,7 @@ import {
 import { LotMap } from "@/components/LotMap";
 import { seedReports } from "@/lib/fixtures";
 import { canonicalReport, reportMemo, sha256Hex } from "@/lib/hash";
+import { ROUND_POOL_SOL } from "@/lib/payment";
 import type { Report, RoundResult, Signal } from "@/lib/types";
 
 const ZONE = "pergamino";
@@ -75,6 +78,14 @@ function friendly(message: string) {
 interface Payout {
   index_sig: string;
   payments: { wallet: string; reward: number; signature: string }[];
+}
+
+/** Lo que cobró en esta ronda la wallet conectada (el agrónomo que muestra la demo). */
+interface Earning {
+  reward: number;
+  signature: string;
+  before: number | null;
+  after: number | null;
 }
 
 interface BasisCover {
@@ -130,6 +141,33 @@ function Flow({ client }: { client: AppClient }) {
   const [tab, setTab] = useState<Tab>("agronomist");
   const [error, setError] = useState<{ at: Busy; message: string } | null>(null);
   const resultsRef = useRef<HTMLHeadingElement>(null);
+  const me = connected?.account.address ?? null;
+  const [balance, setBalance] = useState<number | null>(null);
+  const [earning, setEarning] = useState<Earning | null>(null);
+
+  // Saldo de la wallet conectada en devnet, para ver en pantalla lo que cobra el agrónomo.
+  const refreshBalance = useCallback(async (): Promise<number | null> => {
+    if (!me) return null;
+    const { value } = await client.rpc.getBalance(address(me), { commitment: "confirmed" }).send();
+    const sol = Number(value) / 1e9;
+    setBalance(sol);
+    return sol;
+  }, [client, me]);
+
+  useEffect(() => {
+    if (!me) return;
+    let stale = false;
+    client.rpc
+      .getBalance(address(me), { commitment: "confirmed" })
+      .send()
+      .then(({ value }) => {
+        if (!stale) setBalance(Number(value) / 1e9);
+      })
+      .catch(() => {});
+    return () => {
+      stale = true;
+    };
+  }, [client, me]);
 
   // La agrónoma firma con Phantom un memo con el hash de su reporte.
   const submit = useAction(async (signal_: AbortSignal, report: Report) => {
@@ -177,6 +215,7 @@ function Flow({ client }: { client: AppClient }) {
     setPayout(null);
     setCover(null);
     setMine(null);
+    setEarning(null);
     setNote("");
     setError(null);
     setTab("agronomist");
@@ -235,6 +274,7 @@ function Flow({ client }: { client: AppClient }) {
               <span className="chip bg-brand-50 text-brand-700">
                 <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />
                 {short(connected.account.address)}
+                {balance !== null ? <span className="tabular-nums font-semibold">· {balance.toFixed(4)} SOL</span> : null}
               </span>
               <button className="btn-ghost" onClick={() => disconnect()}>
                 Disconnect
@@ -263,7 +303,7 @@ function Flow({ client }: { client: AppClient }) {
           <RoleIntro
             icon={<IconSprout />}
             title="Report what you see in your lot"
-            text="Connect your wallet, report the crop condition and sign. Your report is registered on Solana with a timestamp. That is all an agronomist does."
+            text={`Connect your wallet, report the crop condition and sign. Your report is registered on Solana with a timestamp. When the round closes, ${ROUND_POOL_SOL} SOL is shared among the valid reports and paid to your wallet.`}
           />
 
           <div className="grid gap-6 lg:grid-cols-5">
@@ -388,7 +428,9 @@ function Flow({ client }: { client: AppClient }) {
                   <IconCheck className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="font-semibold text-brand-900">Report registered on Solana</p>
+                  <p className="font-semibold text-brand-900">
+                    {earning ? `You earned ${earning.reward} SOL for this report` : "Report registered on Solana"}
+                  </p>
                   <p className="text-sm text-brand-700">
                     Only its fingerprint (hash) is on-chain, with your signature and the time.{" "}
                     <ExplorerLink signature={mine.memo_sig}>View transaction</ExplorerLink>
@@ -481,13 +523,25 @@ function Flow({ client }: { client: AppClient }) {
               headingRef={resultsRef}
               result={result}
               reports={reports}
+              me={me}
+              reported={!!mine?.memo_sig}
+              earning={earning}
               payout={payout}
               cover={cover}
               busy={busy}
               error={error}
               onPay={async () => {
+                const before = await refreshBalance().catch(() => balance);
                 const p = await post<Payout>("/api/payout", { result }, "payout");
-                if (p) setPayout(p);
+                if (!p) return;
+                setPayout(p);
+                const mineRow = me ? p.payments.find((x) => x.wallet === me) : undefined;
+                if (mineRow) {
+                  // El RPC tarda un instante en reflejar el saldo confirmado.
+                  await new Promise((r) => setTimeout(r, 1500));
+                  const after = await refreshBalance().catch(() => null);
+                  setEarning({ reward: mineRow.reward, signature: p.index_sig, before, after });
+                }
               }}
               onCover={async () => {
                 const p = await post<BasisCover>("/api/basis-cover", { result }, "cover");
@@ -506,6 +560,9 @@ function Results({
   headingRef,
   result,
   reports,
+  me,
+  reported,
+  earning,
   payout,
   cover,
   busy,
@@ -517,6 +574,9 @@ function Results({
   headingRef: React.RefObject<HTMLHeadingElement | null>;
   result: RoundResult;
   reports: Report[];
+  me: string | null;
+  reported: boolean;
+  earning: Earning | null;
   payout: Payout | null;
   cover: BasisCover | null;
   busy: Busy | null;
@@ -642,10 +702,12 @@ function Results({
             <tbody className="divide-y divide-black/5">
               {result.scores.map((s) => {
                 const out = flagged.has(s.wallet);
+                const isMe = s.wallet === me;
                 return (
-                  <tr key={s.wallet}>
+                  <tr key={s.wallet} className={isMe ? "bg-brand-50" : undefined}>
                     <td className="py-2.5 pr-4">
                       <code>{short(s.wallet)}</code>
+                      {isMe ? <span className="chip ml-2 bg-brand-600 text-white">you</span> : null}
                     </td>
                     <td className="py-2.5 pr-4 tabular-nums">
                       {out ? <span className="chip bg-red-100 text-red-800">excluded</span> : s.score.toFixed(2)}
@@ -691,6 +753,26 @@ function Results({
               <p className="mt-1 text-sm text-neutral-700">
                 {payout.payments.length} agronomists paid ·{" "}
                 <ExplorerLink signature={payout.index_sig}>View transaction</ExplorerLink>
+              </p>
+            ) : null}
+            {payout && earning ? (
+              <div className="mt-3 rounded-xl border border-brand-200 bg-brand-50 p-4">
+                <p className="text-lg font-semibold text-brand-900">You earned {earning.reward} SOL as an agronomist</p>
+                {earning.before !== null && earning.after !== null ? (
+                  <p className="mt-1 text-sm tabular-nums text-brand-800">
+                    Your wallet: {earning.before.toFixed(4)} → <strong>{earning.after.toFixed(4)} SOL</strong>
+                  </p>
+                ) : null}
+                <p className="mt-1 text-sm text-brand-800">
+                  Check it in Phantom&apos;s activity tab (Devnet). Paid for an honest report, whatever the weather.
+                </p>
+              </div>
+            ) : null}
+            {payout && !earning ? (
+              <p className="mt-2 text-sm text-neutral-600">
+                {reported
+                  ? "Your reward is on its way; check Phantom's activity tab."
+                  : "Your wallet did not report this round, so it was not paid. Sign a report in the Agronomist tab first."}
               </p>
             ) : null}
             {error?.at === "payout" ? <ErrorBox>{error.message}</ErrorBox> : null}
