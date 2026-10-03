@@ -110,6 +110,12 @@ function Flow({ client }: { client: AppClient }) {
 
   return (
     <div className="space-y-8">
+      <RoleHeader
+        role="Informant view"
+        who="Agronomist in the field"
+        what="Connects a wallet, reports what they see and signs. That is all an informant does."
+      />
+
       <Step n={1} title="Connect your wallet (devnet)">
         {connected ? (
           <div className="flex items-center gap-3">
@@ -194,6 +200,12 @@ function Flow({ client }: { client: AppClient }) {
         </div>
       </Step>
 
+      <RoleHeader
+        role="Insurer / operator view"
+        who="Insurance company or cooperative"
+        what={`Round for ${CROP} in Pergamino closes every Monday at 12:00 (Argentina). Nobody picks the moment: in production it closes on its deadline. In this demo it is closed manually.`}
+      />
+
       <Step n={3} title={`Round panel · ${reports.length} reports`}>
         {seeds.length === 0 ? (
           <p className="text-red-600">Missing NEXT_PUBLIC_SEED_WALLETS: run the devnet setup script.</p>
@@ -216,7 +228,7 @@ function Flow({ client }: { client: AppClient }) {
             if (r) setResult(r);
           }}
         >
-          {busy === "close" ? "Closing round…" : "Close round"}
+          {busy === "close" ? "Closing round…" : "Close round now (demo)"}
         </button>
         <p className="mt-1 text-xs text-neutral-500">Closing the round shows the index, the flagged reports and the payouts below.</p>
       </Step>
@@ -224,17 +236,21 @@ function Flow({ client }: { client: AppClient }) {
       {result ? (
         <Step n={4} title="Index">
           <div className="grid grid-cols-2 gap-3">
-            <Stat label="Satellite / weather" value={result.satellite_status === "below" ? "Drought" : "Normal"} />
+            <Stat label="Weather index (Open-Meteo)" value={result.satellite_status === "below" ? "Drought" : "Normal"} />
             <Stat label="Field panel" value={result.panel_status === "below" ? "Drought" : "Normal"} />
           </div>
           {result.divergence ? (
             <p className="mt-3 rounded bg-red-100 p-3 font-medium text-red-900">
-              Basis risk detected: the satellite index and the field panel disagree.
+              Basis risk detected: the weather index and the field panel disagree.
             </p>
           ) : null}
           <p className="mt-3">
             Index <b>{result.index}</b> · rain {result.weather.precip_30d_mm} mm in 30 days vs{" "}
             {result.weather.baseline_30d_mm} mm 5-year average ({result.weather.source})
+          </p>
+          <p className="mt-1 text-xs text-neutral-500">
+            Demo proxy: rainfall and soil moisture from weather models, not satellite imagery. In production the panel
+            audits the insurer&apos;s own satellite index for the same grid cell.
           </p>
           <p className="mt-2 text-neutral-700 dark:text-neutral-300">{result.explanation}</p>
           {result.flags.map((f) => (
@@ -324,6 +340,16 @@ function Flow({ client }: { client: AppClient }) {
       ) : null}
 
       {error ? <p className="text-red-600">{error}</p> : null}
+    </div>
+  );
+}
+
+function RoleHeader({ role, who, what }: { role: string; who: string; what: string }) {
+  return (
+    <div className="border-l-4 border-green-700 pl-3">
+      <div className="text-xs font-semibold uppercase tracking-wide text-green-700">{role}</div>
+      <div className="font-medium">{who}</div>
+      <p className="text-sm text-neutral-600 dark:text-neutral-400">{what}</p>
     </div>
   );
 }
