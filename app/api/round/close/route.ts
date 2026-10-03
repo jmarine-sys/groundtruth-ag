@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     try {
       weather = await fetchWeather(body.zone);
     } catch (error) {
-      // Sin clima no hay índice: la ronda se suspende hasta que Open-Meteo vuelva (OD-19).
+      // Sin clima no hay índice: la ronda se suspende hasta que Open-Meteo vuelva (OD-22).
       console.error("Open-Meteo no respondió:", error);
       return Response.json(
         { error: "Weather service unavailable: rounds are suspended until it is back." },
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   try {
     review = await reviewPanel(body.reports, weather, satellite_status);
   } catch (error) {
-    // Sin la revisión de la IA no se juzga a nadie: la ronda se suspende hasta que vuelva (OD-20).
+    // Sin la revisión de la IA no se juzga a nadie: la ronda se suspende hasta que vuelva (OD-23).
     console.error("La revisión con IA no está disponible:", error);
     return Response.json(
       { error: "AI review unavailable: rounds are suspended until it is back." },

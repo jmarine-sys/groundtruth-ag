@@ -9,7 +9,7 @@ vi.mock("@anthropic-ai/sdk", () => ({
   },
 }));
 
-import { mergeFlags, reviewPanel, ReviewUnavailableError } from "./ai";
+import { mergeFlags, panelSummary, reviewPanel, ReviewUnavailableError } from "./ai";
 
 const reports = seedReports(["A1", "B2", "C3", "D4"], "2026-10-03T15:00:00Z");
 const weather = { source: "fixed" as const, soil_moisture: 0.27, precip_30d_mm: 58, baseline_30d_mm: 61 };
@@ -39,6 +39,17 @@ function reviewError() {
     (error: unknown) => error,
   );
 }
+
+describe("panelSummary", () => {
+  it("cuenta solo los reportes no marcados", () => {
+    const flags = [{ wallet: "D4", reason: "copy" }];
+    expect(panelSummary(reports, flags)).toBe("3 of 3 valid reports say the crop is below normal (1 flagged and excluded).");
+  });
+
+  it("sin marcas no agrega la aclaración", () => {
+    expect(panelSummary(reports.slice(0, 3), [])).toBe("3 of 3 valid reports say the crop is below normal.");
+  });
+});
 
 describe("reviewPanel", () => {
   it("si Claude no responde, no juzga a nadie: la revisión no está disponible", async () => {
@@ -71,6 +82,8 @@ describe("reviewPanel", () => {
     });
     const review = await reviewPanel(reports, weather, "normal");
     expect(review.flags.map((f) => f.wallet)).toEqual(["D4"]);
+    // El conteo lo pone el código: 3 válidos aunque el modelo no haya marcado la copia.
+    expect(review.explanation).toBe("3 of 3 valid reports say the crop is below normal (1 flagged and excluded). Two sentences.");
     expect(review.model).toBe("claude-haiku-4-5-20251001");
   });
 

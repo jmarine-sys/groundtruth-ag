@@ -65,7 +65,7 @@ export function rewards(
 /**
  * Colusión: una nota idéntica a la de otro informante anterior (sin importar mayúsculas
  * ni espacios). Una nota vacía no es copia de nadie. Se suma a la revisión de la IA;
- * sin IA la ronda no se cierra (OD-20).
+ * sin IA la ronda no se cierra (OD-23).
  */
 export function copiedNoteFlags(reports: Report[]): Flag[] {
   const seen = new Map<string, string>();

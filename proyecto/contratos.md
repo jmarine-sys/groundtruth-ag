@@ -29,12 +29,12 @@ Cambiar algo de acá requiere avisar a los dos.
 
 El servidor revisa la ronda antes de cerrarla ([lib/validation.ts](../lib/validation.ts)) y no modifica los datos (el hash firmado onchain sigue valiendo):
 
-- `wallet` tiene que ser una dirección de Solana válida, y **una sola por ronda** (OD-17).
+- `wallet` tiene que ser una dirección de Solana válida, y **una sola por ronda** (OD-20).
 - `note` y `crop` no pueden estar vacíos; `note` hasta 500 caracteres.
 - `predicted_pct` es un entero de 0 a 100; `signal` es `"below"` o `"normal"`; `ts` es fecha ISO en UTC.
 - Todos los reportes son de la `zone` del body, que tiene que existir.
 
-Errores: `400 { "error": "Invalid round: reports.1.note: note is empty" }` si algo de lo anterior falla o el JSON está roto; `503` si Open-Meteo no responde (OD-19) o si la revisión de Claude no está disponible (OD-20). Con `503` la ronda se suspende: no se marca ni se paga a nadie.
+Errores: `400 { "error": "Invalid round: reports.1.note: note is empty" }` si algo de lo anterior falla o el JSON está roto; `503` si Open-Meteo no responde (OD-22) o si la revisión de Claude no está disponible (OD-23). Con `503` la ronda se suspende: no se marca ni se paga a nadie.
 
 Respuesta (`RoundResult`):
 

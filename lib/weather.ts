@@ -1,9 +1,7 @@
 import type { Signal, Weather } from "./types";
+import { ZONES } from "./zones";
 
-// Zonas de la demo. Por ahora una sola.
-export const ZONES: Record<string, { lat: number; lon: number; name: string }> = {
-  pergamino: { lat: -33.89, lon: -60.57, name: "Pergamino, Buenos Aires" },
-};
+export { ZONES };
 
 const TZ = "America%2FArgentina%2FBuenos_Aires";
 const BASELINE_YEARS = 5;
