@@ -31,7 +31,7 @@ git clone git@github.com:jmarine-sys/groundtruth-ag.git
 cd groundtruth-ag && npm install
 git checkout dev-a          # Dev A · dev-b para Dev B
 cp .env.example .env.local  # completar; nunca commitear
-npm run setup:devnet        # wallet del servidor, token de prueba y wallets precargadas (solo devnet)
+npm run setup:devnet        # solo si no tenés SERVER_SECRET_KEY: crea tu propia wallet del servidor (solo devnet)
 npm run dev                 # http://localhost:3000
 npm test
 ```
@@ -41,6 +41,14 @@ npm test
 | Dev A | `dev-a` | T0.1 deploy en Vercel → T1.1 Phantom → T1.2 Memo | Esqueleto Next.js, tipos en `lib/types.ts` |
 | Dev B | `dev-b` | Clave de Claude en `.env.local` → probar `POST /api/round/close` → T2.4 llamadas | T1.3 `lib/weather.ts`, T1.4 `lib/scoring.ts`, T2.1 `lib/ai.ts`, ruta `app/api/round/close/route.ts`, `lib/fixtures.ts` |
 | AV | — | T0.3 storyboard → T1.5 deck | — |
+
+Variables:
+
+| Variable | Dónde | Qué es |
+|---|---|---|
+| `NEXT_PUBLIC_SERVER_WALLET`, `NEXT_PUBLIC_SEED_WALLETS`, `NEXT_PUBLIC_INSURED_WALLET`, `SOLANA_RPC_URL`, `NEXT_PUBLIC_SOLANA_RPC_URL`, `ROUND_POOL_SOL`, `COVER_PAYOUT_SOL` | `.env` (versionado) | Públicas: direcciones y montos de la demo |
+| `SERVER_SECRET_KEY` | `.env.local` (nunca en git) | Clave privada de la wallet que paga. Pedirla al líder por un canal privado, o correr `npm run setup:devnet` para crear una propia y cargarle ~0,5 SOL de devnet desde Phantom |
+| `ANTHROPIC_API_KEY` | `.env.local` (nunca en git) | Opcional: sin ella la ronda la revisa la regla fija (OD-26) |
 
 Integración: a la 1:30 y a las 2:30, merge de `dev-a` y `dev-b` en `main` y prueba del recorrido completo en la URL pública.
 

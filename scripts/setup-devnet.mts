@@ -3,7 +3,7 @@
 // - Le pide SOL de prueba al faucet de devnet.
 // - Muestra el saldo de SOL de devnet del servidor (los pagos de la demo son en SOL).
 // - Genera 4 direcciones de informantes precargados y 1 de productor asegurado.
-// Escribe todo en .env.local, que está en .gitignore. Nunca imprime claves privadas.
+// Escribe en .env.local (en .gitignore) solo lo que no esté ya en el .env compartido. Nunca imprime claves privadas.
 //
 // Uso: npm run setup:devnet
 
@@ -19,15 +19,19 @@ import { signer } from "@solana/kit-plugin-signer";
 
 const ENV_FILE = ".env.local";
 
-function readEnv(): Map<string, string> {
+function readEnv(file = ENV_FILE): Map<string, string> {
   const env = new Map<string, string>();
-  if (!existsSync(ENV_FILE)) return env;
-  for (const line of readFileSync(ENV_FILE, "utf8").split("\n")) {
+  if (!existsSync(file)) return env;
+  for (const line of readFileSync(file, "utf8").split("\n")) {
     const match = line.match(/^([A-Z0-9_]+)=(.*)$/);
     if (match) env.set(match[1], match[2]);
   }
   return env;
 }
+
+// Valores públicos compartidos por el equipo (versionados en .env). Si ya están ahí,
+// no se generan de nuevo: todos usan los mismos informantes y el mismo asegurado.
+const shared = readEnv(".env");
 
 function writeEnv(env: Map<string, string>) {
   const body = [...env].map(([k, v]) => `${k}=${v}`).join("\n") + "\n";
@@ -81,12 +85,12 @@ if (balance < lamports(BigInt(200_000_000))) {
 const { value: after } = await client.rpc.getBalance(server.address).send();
 console.log(`SOL de devnet en la wallet del servidor: ${Number(after) / 1e9}`);
 
-if (!env.get("NEXT_PUBLIC_SEED_WALLETS")) {
+if (!env.get("NEXT_PUBLIC_SEED_WALLETS") && !shared.get("NEXT_PUBLIC_SEED_WALLETS")) {
   // Solo hacen falta las direcciones: estos informantes no firman, solo cobran.
   const seeds = await Promise.all(Array.from({ length: 4 }, () => generateKeyPairSigner()));
   env.set("NEXT_PUBLIC_SEED_WALLETS", seeds.map((s) => s.address).join(","));
 }
-if (!env.get("NEXT_PUBLIC_INSURED_WALLET")) {
+if (!env.get("NEXT_PUBLIC_INSURED_WALLET") && !shared.get("NEXT_PUBLIC_INSURED_WALLET")) {
   env.set("NEXT_PUBLIC_INSURED_WALLET", (await generateKeyPairSigner()).address);
 }
 env.set("NEXT_PUBLIC_SERVER_WALLET", server.address);
@@ -94,5 +98,5 @@ writeEnv(env);
 
 console.log("Listo. Variables escritas en .env.local:");
 for (const key of ["NEXT_PUBLIC_SERVER_WALLET", "NEXT_PUBLIC_SEED_WALLETS", "NEXT_PUBLIC_INSURED_WALLET"]) {
-  console.log(`  ${key}=${env.get(key)}`);
+  console.log(`  ${key}=${env.get(key) ?? shared.get(key)}`);
 }
