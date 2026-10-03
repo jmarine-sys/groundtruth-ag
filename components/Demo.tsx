@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { getAddMemoInstruction } from "@solana-program/memo";
 import {
   useConnect,
@@ -38,8 +38,15 @@ interface Policy {
   signature?: string;
 }
 
+const noopSubscribe = () => () => {};
+
 export function Demo() {
   const client = useClient<AppClient>();
+  // La wallet solo existe en el navegador: en el servidor siempre se renderiza el
+  // placeholder y en el cliente el flujo completo. Sin esto, React detecta que el HTML
+  // del servidor no coincide con el del navegador (error de hidratación).
+  const isBrowser = useSyncExternalStore(noopSubscribe, () => true, () => false);
+  if (!isBrowser) return <p>Loading wallets…</p>;
   return (
     <WalletReadyGate client={client} fallback={<p>Loading wallets…</p>}>
       <Flow client={client} />
