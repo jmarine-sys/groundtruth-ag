@@ -29,7 +29,7 @@ Sos un compañero de equipo en una hackathon. Respondé en español rioplatense,
 ## Proyecto del equipo
 
 <!-- PROYECTO:START -->
-**Proyecto:** índice agroclimático por informantes. Agrónomos reportan el estado del cultivo por zona, el reporte queda registrado en Solana, se puntúa con peer prediction, una IA marca reportes falsos, los informantes cobran y el índice detecta cuando el satélite no ve la sequía (riesgo base) para aseguradoras.
+**Proyecto:** GroundTruth (repo `groundtruth-ag`), índice agroclimático por informantes. Agrónomos reportan el estado del cultivo por zona, el reporte queda registrado en Solana, se puntúa con peer prediction, una IA marca reportes falsos, los informantes cobran y el índice detecta cuando el satélite no ve la sequía (riesgo base) para aseguradoras.
 
 - **Stack:** Next.js (App Router) + TypeScript, Vercel, Solana **devnet** (programa Memo + transferencias de token de prueba), Phantom, Open-Meteo, Claude API.
 - **Correr:** `npm install` y `npm run dev` (http://localhost:3000). Variables en `.env.local` (ver `.env.example`); nunca commitear claves.

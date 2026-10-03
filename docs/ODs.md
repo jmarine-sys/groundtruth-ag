@@ -50,14 +50,14 @@ It is the counterpart of [ADRs.md](ADRs.md): there is **what was decided and why
 | OD-10 | Fewer than 3 real informants per zone | `risk` | OPEN | RBTS degrades below n=3; demo panel is synthetic and declared as such | T2.4, traction claim |
 | OD-11 | Informant payouts not classified as gambling in Argentina | `risk` | NEEDS-INPUT | Informants never stake money (Ley 538 CABA definition); needs a lawyer's opinion, not verified | any launch beyond devnet |
 | OD-12 | Pitch video length (2 or 3 min) and English-only rule | `decision` | NEEDS-INPUT | Marked "to confirm" in [contexto-hackathon.md](contexto-hackathon.md); must be read in official rules | T3.2, T3.3 |
-| OD-13 | GitHub remote | `decision` | NEEDS-INPUT | Public repo chosen; waiting for the empty repo URL from the team lead | parallel work on `dev-a` / `dev-b` |
+| OD-13 | GitHub remote | `decision` | DECIDED | Public repo `git@github.com:jmarine-sys/groundtruth-ag.git`; branches `main`, `dev-a`, `dev-b` | — |
 
 ---
 
 ## The state of the project, read off the register
 
-13 items: 4 decided, 0 leaning, 5 blocked on input this team does not produce yet (API key, insurer
-answer, legal opinion, official rules, repo URL), 4 open. The five `NEEDS-INPUT` items do not unblock
+13 items: 5 decided, 0 leaning, 4 blocked on input this team does not produce yet (API key, insurer
+answer, legal opinion, official rules), 4 open. The four `NEEDS-INPUT` items do not unblock
 by coding longer — they unblock by asking someone.
 
 ---
