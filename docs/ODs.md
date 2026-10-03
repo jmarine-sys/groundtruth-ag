@@ -58,13 +58,15 @@ It is the counterpart of [ADRs.md](ADRs.md): there is **what was decided and why
 | OD-18 | Report location and grid cell | `risk` | OPEN | Lot and cell are fixed demo data in [lib/zones.ts](../lib/zones.ts), shown on a map as "registered at account creation" ([components/LotMap.tsx](../components/LotMap.tsx)); reports carry no location. Needs geolocation + ~20 km cell + contract change with Dev B; GPS spoofing unaddressed | multi-zone, comparing each report with its cell |
 | OD-19 | Who closes a round and when | `decision` | DECIDED | Rounds close on a fixed deadline (Monday 12:00 ART), not at an informant's or operator's choice; the demo closes manually and says so in the UI. Permissionless close after the deadline arrives with OD-02 | — |
 | OD-20 | What happens when the panel and the weather index disagree | `decision` | DECIDED | A basis-risk cover pays the insured automatically when the weather index says normal and at least 3 valid (unflagged) reports confirm drought ([app/api/basis-cover/route.ts](../app/api/basis-cover/route.ts)). Rejected: opening a claim review without paying (more defensible before an insurer, weaker demo). Reservation: the pitch must defend why an insurer trusts panel opinions — outcome-independent pay, collusion flags, insured excluded from the panel | pitch Q&A |
+| OD-21 | Payment token for informants and the basis-risk cover | `decision` | DECIDED | Devnet USDC (`4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU`, SPL Token, 6 decimals, checked on Circle docs and on-chain) instead of the custom GTT token, which Phantom showed as unrecognized; pool 1 USDC per round, cover 2 USDC ([lib/payment.ts](../lib/payment.ts)) | — |
+| OD-22 | Devnet USDC balance of the server wallet | `risk` | NEEDS-INPUT | Must be requested by hand at faucet.circle.com (Solana Devnet) for `Cv9Nos5wnwc2N4LmoZBMMbcvi2tFLUZqGtuC9gBBdwSm`; each demo run uses ~3 USDC | payouts in the demo |
 
 ---
 
 ## The state of the project, read off the register
 
-20 items: 11 decided, 0 leaning, 4 blocked on input this team does not produce yet (API key, insurer
-answer, legal opinion, official rules), 5 open. The four `NEEDS-INPUT` items do not unblock
+22 items: 12 decided, 0 leaning, 5 blocked on input this team does not produce yet (API key, insurer
+answer, legal opinion, official rules, devnet USDC), 5 open. The five `NEEDS-INPUT` items do not unblock
 by coding longer — they unblock by asking someone.
 
 ---

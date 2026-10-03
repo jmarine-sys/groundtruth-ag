@@ -1,7 +1,7 @@
 // Prepara devnet para la demo (solo devnet: la plata es de mentira).
 // - Crea (o reutiliza) la wallet del servidor que paga recompensas y pólizas.
 // - Le pide SOL de prueba al faucet de devnet.
-// - Crea el token de prueba "GTT" (0 decimales) y le acuña un fondo al servidor.
+// - Muestra el saldo de USDC de devnet del servidor (los pagos son en USDC).
 // - Genera 4 direcciones de informantes precargados y 1 de productor asegurado.
 // Escribe todo en .env.local, que está en .gitignore. Nunca imprime claves privadas.
 //
@@ -11,15 +11,14 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import {
   createClient,
   createKeyPairSignerFromBytes,
+  address,
   generateKeyPairSigner,
   lamports,
 } from "@solana/kit";
 import { solanaDevnetRpc } from "@solana/kit-plugin-rpc";
 import { signer } from "@solana/kit-plugin-signer";
-import { tokenProgram } from "@solana-program/token";
 
 const ENV_FILE = ".env.local";
-const POOL_SUPPLY = BigInt(100_000);
 
 function readEnv(): Map<string, string> {
   const env = new Map<string, string>();
@@ -64,8 +63,7 @@ if (env.get("SERVER_SECRET_KEY")) {
 const rpcUrl = env.get("SOLANA_RPC_URL") || "https://api.devnet.solana.com";
 const client = await createClient()
   .use(signer(server))
-  .use(solanaDevnetRpc({ rpcUrl, transactionConfig: { version: 1 } }))
-  .use(tokenProgram());
+  .use(solanaDevnetRpc({ rpcUrl, transactionConfig: { version: 1 } }));
 
 const { value: balance } = await client.rpc.getBalance(server.address).send();
 if (balance < lamports(BigInt(200_000_000))) {
@@ -80,16 +78,21 @@ if (balance < lamports(BigInt(200_000_000))) {
   }
 }
 
-if (!env.get("NEXT_PUBLIC_TEST_MINT")) {
-  const mint = await generateKeyPairSigner();
-  await client.token.instructions
-    .createMint({ newMint: mint, decimals: 0, mintAuthority: server.address })
-    .sendTransaction();
-  await client.token.instructions
-    .mintToATA({ mint: mint.address, owner: server.address, mintAuthority: server, amount: POOL_SUPPLY, decimals: 0 })
-    .sendTransaction();
-  env.set("NEXT_PUBLIC_TEST_MINT", mint.address);
-  console.log(`Token de prueba creado: ${mint.address} (${POOL_SUPPLY} unidades al servidor)`);
+// Los pagos son en USDC de devnet (lib/payment.ts). El servidor necesita saldo:
+// se pide gratis en https://faucet.circle.com eligiendo "Solana Devnet".
+const USDC_DEVNET = "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU";
+const { value: tokenAccounts } = await client.rpc
+  .getTokenAccountsByOwner(server.address, { mint: address(USDC_DEVNET) }, { encoding: "jsonParsed" })
+  .send();
+const usdc = tokenAccounts.reduce(
+  (sum, a) => sum + Number(a.account.data.parsed.info.tokenAmount.uiAmount ?? 0),
+  0,
+);
+console.log(`USDC de devnet en la wallet del servidor: ${usdc}`);
+if (usdc < 5) {
+  console.log(
+    `Cargá USDC de prueba en https://faucet.circle.com (red "Solana Devnet") para ${server.address}. Cada ronda de la demo usa ~3 USDC.`,
+  );
 }
 
 if (!env.get("NEXT_PUBLIC_SEED_WALLETS")) {
@@ -104,6 +107,6 @@ env.set("NEXT_PUBLIC_SERVER_WALLET", server.address);
 writeEnv(env);
 
 console.log("Listo. Variables escritas en .env.local:");
-for (const key of ["NEXT_PUBLIC_SERVER_WALLET", "NEXT_PUBLIC_TEST_MINT", "NEXT_PUBLIC_SEED_WALLETS", "NEXT_PUBLIC_INSURED_WALLET"]) {
+for (const key of ["NEXT_PUBLIC_SERVER_WALLET", "NEXT_PUBLIC_SEED_WALLETS", "NEXT_PUBLIC_INSURED_WALLET"]) {
   console.log(`  ${key}=${env.get(key)}`);
 }

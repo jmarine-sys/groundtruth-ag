@@ -4,6 +4,7 @@ import { solanaDevnetRpc } from "@solana/kit-plugin-rpc";
 import { signer } from "@solana/kit-plugin-signer";
 import { getAddMemoInstruction } from "@solana-program/memo";
 import { tokenProgram } from "@solana-program/token";
+import { PAYMENT, toBaseUnits } from "./payment";
 
 // Cliente de Solana del servidor: paga recompensas y pólizas desde la wallet del
 // servidor (SERVER_SECRET_KEY, generada por scripts/setup-devnet.mts). Solo devnet.
@@ -29,21 +30,19 @@ export function serverClient() {
   return clientPromise;
 }
 
-export function testMint(): Address {
-  const mint = process.env.NEXT_PUBLIC_TEST_MINT;
-  if (!mint) throw new Error("Falta NEXT_PUBLIC_TEST_MINT: corré `npm run setup:devnet`.");
-  return address(mint);
+export function paymentMint(): Address {
+  return address(PAYMENT.mint);
 }
 
-/** Transfiere unidades del token de prueba (0 decimales) y deja un memo en la misma transacción. */
+/** Transfiere USDC de devnet (monto en USDC, por ejemplo 0.24) y deja un memo en la misma transacción. */
 export async function payWithMemo(recipient: Address, amount: number, memo: string): Promise<string> {
   const client = await serverClient();
   const transfer = await client.token.instructions.transferToATA({
-    mint: testMint(),
+    mint: paymentMint(),
     authority: client.payer,
     recipient,
-    amount: BigInt(amount),
-    decimals: 0,
+    amount: toBaseUnits(amount),
+    decimals: PAYMENT.decimals,
   });
   const result = await client.sendTransaction([transfer, getAddMemoInstruction({ memo })]);
   return result.context.signature;
