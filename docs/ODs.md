@@ -57,12 +57,13 @@ It is the counterpart of [ADRs.md](ADRs.md): there is **what was decided and why
 | OD-17 | What stands in for the satellite index in the demo | `decision` | DECIDED | Open-Meteo rainfall and soil moisture (weather models), labelled "Weather index" in the UI; in production the panel audits the insurer's own satellite index for the same grid cell. MODIS NDVI rejected for today: weeks of lag | — |
 | OD-18 | Report location and grid cell | `risk` | OPEN | Lot and cell are fixed demo data in [lib/zones.ts](../lib/zones.ts), shown on a map as "registered at account creation" ([components/LotMap.tsx](../components/LotMap.tsx)); reports carry no location. Needs geolocation + ~20 km cell + contract change with Dev B; GPS spoofing unaddressed | multi-zone, comparing each report with its cell |
 | OD-19 | Who closes a round and when | `decision` | DECIDED | Rounds close on a fixed deadline (Monday 12:00 ART), not at an informant's or operator's choice; the demo closes manually and says so in the UI. Permissionless close after the deadline arrives with OD-02 | — |
+| OD-20 | What happens when the panel and the weather index disagree | `decision` | DECIDED | Opens a basis-risk claim review recorded on Solana (memo), no automatic payout; the insurer sends an adjuster or pays by exception ([app/api/claim-review/route.ts](../app/api/claim-review/route.ts)). Rejected: auto-paying a "basis-risk cover" from panel opinions, harder to defend before an insurer and the SSN actuary rule | — |
 
 ---
 
 ## The state of the project, read off the register
 
-19 items: 10 decided, 0 leaning, 4 blocked on input this team does not produce yet (API key, insurer
+20 items: 11 decided, 0 leaning, 4 blocked on input this team does not produce yet (API key, insurer
 answer, legal opinion, official rules), 5 open. The four `NEEDS-INPUT` items do not unblock
 by coding longer — they unblock by asking someone.
 
