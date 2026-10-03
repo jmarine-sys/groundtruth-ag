@@ -85,7 +85,7 @@ cd groundtruth-ag
 npm install
 cp .env.example .env.local
 npm run setup:devnet   # creates a server wallet in .env.local (devnet only)
-npm run dev            # http://localhost:3000
+npm run dev            # landing at http://localhost:3000, demo at /demo
 npm test
 ```
 
@@ -102,6 +102,9 @@ After `setup:devnet`, send about 0.5 devnet SOL to the printed server wallet add
 | `ANTHROPIC_API_KEY` | `.env.local` only | Optional. Enables the Claude review |
 
 ## Demo walkthrough
+
+The landing page (`/`) explains the problem; the demo lives at `/demo`.
+
 
 1. **Agronomist tab:** connect Phantom (Devnet), choose the crop condition, set your guess, write a note and sign. The report hash appears on Solana Explorer.
 2. **Insurer tab:** the panel shows the pre-loaded reports plus yours. Click **Close round now (demo)**: weather index vs field panel, the basis-risk alert, flagged reports and rewards.
