@@ -32,9 +32,11 @@ interface Payout {
   payments: { wallet: string; reward: number; signature: string }[];
 }
 
-interface ClaimReview {
-  opened: boolean;
+interface BasisCover {
+  paid: boolean;
+  valid: number;
   reason?: string;
+  payout?: number;
   signature?: string;
 }
 
@@ -77,7 +79,7 @@ function Flow({ client }: { client: AppClient }) {
   const [mine, setMine] = useState<Report | null>(null);
   const [result, setResult] = useState<RoundResult | null>(null);
   const [payout, setPayout] = useState<Payout | null>(null);
-  const [review, setReview] = useState<ClaimReview | null>(null);
+  const [review, setReview] = useState<BasisCover | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [tab, setTab] = useState<"informant" | "operator">("informant");
   const [error, setError] = useState<string | null>(null);
@@ -399,8 +401,8 @@ function Flow({ client }: { client: AppClient }) {
                   className="btn"
                   disabled={!!busy || !payout || !!review}
                   onClick={async () => {
-                    const p = await post<ClaimReview>(
-                      "/api/claim-review",
+                    const p = await post<BasisCover>(
+                      "/api/basis-cover",
                       { result },
                       "review",
                     );
@@ -408,8 +410,8 @@ function Flow({ client }: { client: AppClient }) {
                   }}
                 >
                   {busy === "review"
-                    ? "Recording review…"
-                    : "Open basis-risk claim review"}
+                    ? "Checking cover…"
+                    : "Settle basis-risk cover"}
                 </button>
               </div>
 
@@ -442,29 +444,35 @@ function Flow({ client }: { client: AppClient }) {
                 </ul>
               ) : null}
               {review ? (
-                <div className="mt-3 rounded bg-blue-50 p-3 text-blue-950 dark:bg-blue-950 dark:text-blue-100">
-                  {review.opened ? (
+                <div
+                  className={`mt-3 rounded p-3 ${
+                    review.paid
+                      ? "bg-green-100 text-green-900"
+                      : "bg-neutral-100 text-neutral-800 dark:bg-neutral-900 dark:text-neutral-200"
+                  }`}
+                >
+                  {review.paid ? (
                     <>
                       <p className="font-medium">
-                        Claim review opened for the insured lot in this cell.
+                        Basis-risk cover paid {review.payout} GTT to the insured
+                        farmer.
                       </p>
                       <p className="mt-1 text-sm">
-                        The weather index alone would not pay, but the field
-                        panel reports drought. The insurer now sends an adjuster
-                        or pays by exception. Nothing is paid automatically: the
-                        panel audits the index, it does not replace it.{" "}
+                        The weather index alone would not pay, but {review.valid}{" "}
+                        valid field reports confirmed drought in this cell. This
+                        cover pays exactly the case the satellite index misses.{" "}
                         <a
                           className="link"
                           href={explorer(review.signature!)}
                           target="_blank"
                           rel="noreferrer"
                         >
-                          Review recorded on Solana
+                          Payout transaction
                         </a>
                       </p>
                     </>
                   ) : (
-                    <p>No claim review needed: {review.reason}</p>
+                    <p>Basis-risk cover not triggered: {review.reason}</p>
                   )}
                 </div>
               ) : null}
