@@ -51,13 +51,16 @@ It is the counterpart of [ADRs.md](ADRs.md): there is **what was decided and why
 | OD-11 | Informant payouts not classified as gambling in Argentina | `risk` | NEEDS-INPUT | Informants never stake money (Ley 538 CABA definition); needs a lawyer's opinion, not verified | any launch beyond devnet |
 | OD-12 | Pitch video length (2 or 3 min) and English-only rule | `decision` | NEEDS-INPUT | Marked "to confirm" in [contexto-hackathon.md](contexto-hackathon.md); must be read in official rules | T3.2, T3.3 |
 | OD-13 | GitHub remote | `decision` | DECIDED | Public repo `git@github.com:jmarine-sys/groundtruth-ag.git`; branches `main`, `dev-a`, `dev-b` | — |
+| OD-14 | Transaction version for the browser wallet | `decision` | DECIDED | Browser client sends v0 (memo fits in 1232 bytes; no dependency on wallet v1 support); server sends v1 ([app/providers.tsx](../app/providers.tsx), [lib/solana-server.ts](../lib/solana-server.ts)) | — |
+| OD-15 | `/api/payout` and `/api/policy` trust the RoundResult sent by the browser | `debt` | OPEN | Capped by the round pool, devnet test token only; moves onchain with OD-02 | any launch beyond devnet |
+| OD-16 | Devnet SOL for the server wallet | `risk` | NEEDS-INPUT | Public faucet airdrop was rejected on 2026-10-03; needs a manual top-up at faucet.solana.com for `Cv9Nos5wnwc2N4LmoZBMMbcvi2tFLUZqGtuC9gBBdwSm` | T2.2, `npm run setup:devnet` |
 
 ---
 
 ## The state of the project, read off the register
 
-13 items: 5 decided, 0 leaning, 4 blocked on input this team does not produce yet (API key, insurer
-answer, legal opinion, official rules), 4 open. The four `NEEDS-INPUT` items do not unblock
+16 items: 6 decided, 0 leaning, 5 blocked on input this team does not produce yet (API key, insurer
+answer, legal opinion, official rules, devnet SOL), 5 open. The five `NEEDS-INPUT` items do not unblock
 by coding longer — they unblock by asking someone.
 
 ---

@@ -31,6 +31,7 @@ git clone git@github.com:jmarine-sys/groundtruth-ag.git
 cd groundtruth-ag && npm install
 git checkout dev-a          # Dev A · dev-b para Dev B
 cp .env.example .env.local  # completar; nunca commitear
+npm run setup:devnet        # wallet del servidor, token de prueba y wallets precargadas (solo devnet)
 npm run dev                 # http://localhost:3000
 npm test
 ```
@@ -116,6 +117,6 @@ Esperado: `divergence: true` si el clima del día es normal, y `D4` en `flags` p
 ## Estado
 
 - [ ] T0.1 (falta el deploy en Vercel; repo local listo) · [ ] T0.2 · [ ] T0.3 · [ ] T0.4
-- [ ] T1.1 · [ ] T1.2 · [x] T1.3 (falta revisión de Dev B) · [x] T1.4 (falta revisión de Dev B) · [ ] T1.5
-- [x] T2.1 (falta probarlo con la clave de Claude) · [ ] T2.2 · [ ] T2.3 · [ ] T2.4 · [ ] T2.5
+- [x] T1.1 (falta probar en pantalla con Phantom) · [x] T1.2 (falta probar en pantalla) · [x] T1.3 (falta revisión de Dev B) · [x] T1.4 (falta revisión de Dev B) · [ ] T1.5
+- [x] T2.1 (falta probarlo con la clave de Claude) · [x] T2.2 (falta SOL de prueba en la wallet del servidor) · [x] T2.3 (falta probar en pantalla) · [ ] T2.4 · [ ] T2.5
 - [ ] T3.1 · [ ] T3.2 · [ ] T3.3 · [ ] T3.4 · [ ] T3.5

@@ -77,7 +77,7 @@ export function ruleBasedFlags(
     .filter((r) => (r.signal === "below") !== climateSaysBelow)
     .map((r) => ({
       wallet: r.wallet,
-      reason: `Reporta "${r.signal}" contra la mayoría del panel ("${majority}") y contra el clima.`,
+      reason: `Reports "${r.signal}" against both the panel majority ("${majority}") and the weather data.`,
     }));
 
   // Colusión: una nota idéntica a la de otro informante anterior.
@@ -87,7 +87,7 @@ export function ruleBasedFlags(
     const key = r.note.trim().toLowerCase();
     const original = seen.get(key);
     if (original) {
-      copied.push({ wallet: r.wallet, reason: `Copia textual la nota del informante ${short(original)}.` });
+      copied.push({ wallet: r.wallet, reason: `Copies word for word the note of informant ${short(original)}.` });
     } else {
       seen.set(key, r.wallet);
     }
