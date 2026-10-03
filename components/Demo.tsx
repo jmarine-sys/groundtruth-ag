@@ -11,6 +11,7 @@ import {
 } from "@solana/kit-plugin-wallet/react";
 import { useAction, useClient } from "@solana/react";
 import type { AppClient } from "@/app/providers";
+import { LotMap } from "@/components/LotMap";
 import { seedReports } from "@/lib/fixtures";
 import { canonicalReport, reportMemo, sha256Hex } from "@/lib/hash";
 import type { Report, RoundResult, Signal } from "@/lib/types";
@@ -139,6 +140,7 @@ function Flow({ client }: { client: AppClient }) {
 
       <Step n={2} title={`Report crop condition · ${CROP}, Pergamino`}>
         <div className="space-y-3">
+          <LotMap />
           <div className="flex gap-4">
             {(["below", "normal"] as const).map((s) => (
               <label key={s} className="flex items-center gap-2">
